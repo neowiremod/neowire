@@ -11,6 +11,8 @@ for _, addon in pairs(addons) do
 		AddonRoot = head
 		break
 	end
+
+	continue
 end
 
 
@@ -106,7 +108,7 @@ concommand.Add("e2test", function(ply)
 		return
 	end
 
-	local failed, passed = runE2Tests("data/expression2/tests")
+	local failed, passed = runE2Tests("tests")
 
 	local msg = #passed .. "/" .. (#passed + #failed) .. " tests passed"
 	if IsValid(ply) then
