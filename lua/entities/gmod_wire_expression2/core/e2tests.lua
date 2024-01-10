@@ -106,7 +106,7 @@ concommand.Add("e2test", function(ply)
 		return
 	end
 
-	local failed, passed = runE2Tests("tests")
+	local failed, passed = runE2Tests("tests/expression2")
 
 	local msg = #passed .. "/" .. (#passed + #failed) .. " tests passed"
 	if IsValid(ply) then
