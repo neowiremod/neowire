@@ -11,8 +11,6 @@ for _, addon in pairs(addons) do
 		AddonRoot = head
 		break
 	end
-
-	continue
 end
 
 
