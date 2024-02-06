@@ -11,8 +11,8 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 
-	self.Inputs = Wire_CreateInputs(self, { "PixelX", "PixelY", "PixelG", "Clk", "FillColor", "ClearRow", "ClearCol" })
-	self.Outputs = Wire_CreateOutputs(self, { "Memory" })
+	self.Inputs = WireLib.CreateInputs(self, { "PixelX", "PixelY", "PixelG", "Clk", "FillColor", "ClearRow", "ClearCol" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Memory" })
 
 	self.Memory = {}
 

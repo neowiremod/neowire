@@ -11,8 +11,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs( self, { "Activate", "NoCollide", "Strength" } )
-	self.Outputs = Wire_CreateOutputs( self, { "Welded" } )
+	self.Inputs = WireLib.CreateInputs( self, { "Activate", "NoCollide", "Strength" } )
+	self.Outputs = WireLib.CreateOutputs( self, { "Welded" } )
 
 	-- masks containing all current states
 	self.nocollide_masks = {
@@ -40,7 +40,7 @@ local function Weld_Removed( weld, ent )
 	if IsValid(ent) then
 		if not ent.Constraint or ent.Constraint == weld then
 			ent.Constraint = nil
-			Wire_TriggerOutput( ent, "Welded", 0 )
+			WireLib.TriggerOutput( ent, "Welded", 0 )
 			ent:UpdateOverlay()
 		end
 	end
@@ -80,7 +80,7 @@ function ENT:TriggerInput( iname, value )
 
 		elseif value ~= 0 and not self.Constraint then
 			self:Create_Weld()
-			Wire_TriggerOutput( self, "Welded", 1 )
+			WireLib.TriggerOutput( self, "Welded", 1 )
 		end
 
 	elseif iname == "NoCollide" then

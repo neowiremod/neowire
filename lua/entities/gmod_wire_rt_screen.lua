@@ -101,7 +101,7 @@ if SERVER then
 			hook.Add("SetupPlayerVisibility", "ImprovedRTCamera", ImprovedRTCamera)
 		end
 
-        self.Inputs = Wire_CreateInputs( self, InputsTable )
+        self.Inputs = WireLib.CreateInputs( self, InputsTable )
 
         self:SetScaleX(1)
         self:SetScaleY(1)
@@ -123,7 +123,7 @@ if SERVER then
             table.insert(Inputs, tbl.WireName.." ["..tbl.WireType.."]")
         end
 
-        self.Inputs = Wire_CreateInputs( self, Inputs )
+        self.Inputs = WireLib.CreateInputs( self, Inputs )
     end
 
 	function ENT:OnRemove()

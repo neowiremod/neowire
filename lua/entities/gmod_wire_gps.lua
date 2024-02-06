@@ -30,7 +30,7 @@ function ENT:Initialize()
 	self.storedpositions = {};
 	self.arrayindex = 0;
 
-	self.Inputs = Wire_CreateInputs(self, { "Store/Save Pos", "Next", "Remove Save Position"})
+	self.Inputs = WireLib.CreateInputs(self, { "Store/Save Pos", "Next", "Remove Save Position"})
 	self.Outputs = WireLib.CreateSpecialOutputs( self, { "X", "Y", "Z", "Vector", "Recall X", "Recall Y", "Recall Z", "Recall Vector", "Current Memory"}, { "NORMAL", "NORMAL", "NORMAL", "VECTOR", "NORMAL", "NORMAL", "NORMAL", "VECTOR", "NORMAL"})
 end
 
@@ -39,15 +39,15 @@ function ENT:Setup()
 	self.PrevOutput = nil
 
 	//self:ShowOutput(0, 0, 0)
-	Wire_TriggerOutput(self, "X", 0)
-	Wire_TriggerOutput(self, "Y", 0)
-	Wire_TriggerOutput(self, "Z", 0)
-	Wire_TriggerOutput(self, "Vector", Vector(0,0,0))
-	Wire_TriggerOutput(self, "Recall X", 0)
-	Wire_TriggerOutput(self, "Recall Y", 0)
-	Wire_TriggerOutput(self, "Recall Z", 0)
-	Wire_TriggerOutput(self, "Recall Vector", Vector(0,0,0))
-	Wire_TriggerOutput(self, "Current Memory", 0)
+	WireLib.TriggerOutput(self, "X", 0)
+	WireLib.TriggerOutput(self, "Y", 0)
+	WireLib.TriggerOutput(self, "Z", 0)
+	WireLib.TriggerOutput(self, "Vector", Vector(0,0,0))
+	WireLib.TriggerOutput(self, "Recall X", 0)
+	WireLib.TriggerOutput(self, "Recall Y", 0)
+	WireLib.TriggerOutput(self, "Recall Z", 0)
+	WireLib.TriggerOutput(self, "Recall Vector", Vector(0,0,0))
+	WireLib.TriggerOutput(self, "Current Memory", 0)
 end
 
 function ENT:Think()
@@ -56,21 +56,21 @@ function ENT:Think()
 	local pos = self:GetPos()
 	if (COLOSSAL_SANDBOX) then pos = pos * 6.25 end
 
-	Wire_TriggerOutput(self, "X", pos.x)
-	Wire_TriggerOutput(self, "Y", pos.y)
-	Wire_TriggerOutput(self, "Z", pos.z)
-	Wire_TriggerOutput(self, "Vector", pos)
-	Wire_TriggerOutput(self, "Current Memory", self.arrayindex)
+	WireLib.TriggerOutput(self, "X", pos.x)
+	WireLib.TriggerOutput(self, "Y", pos.y)
+	WireLib.TriggerOutput(self, "Z", pos.z)
+	WireLib.TriggerOutput(self, "Vector", pos)
+	WireLib.TriggerOutput(self, "Current Memory", self.arrayindex)
 	if self.arrayindex > 0 then
-		Wire_TriggerOutput(self, "Recall X", self.storedpositions[self.arrayindex].x)
-		Wire_TriggerOutput(self, "Recall Y", self.storedpositions[self.arrayindex].y)
-		Wire_TriggerOutput(self, "Recall Z", self.storedpositions[self.arrayindex].z)
-		Wire_TriggerOutput(self, "Recall Vector", self.storedpositions[self.arrayindex])
+		WireLib.TriggerOutput(self, "Recall X", self.storedpositions[self.arrayindex].x)
+		WireLib.TriggerOutput(self, "Recall Y", self.storedpositions[self.arrayindex].y)
+		WireLib.TriggerOutput(self, "Recall Z", self.storedpositions[self.arrayindex].z)
+		WireLib.TriggerOutput(self, "Recall Vector", self.storedpositions[self.arrayindex])
 	else
-		Wire_TriggerOutput(self, "Recall X", 0)
-		Wire_TriggerOutput(self, "Recall Y", 0)
-		Wire_TriggerOutput(self, "Recall Z", 0)
-		Wire_TriggerOutput(self, "Recall Vector", Vector(0,0,0))
+		WireLib.TriggerOutput(self, "Recall X", 0)
+		WireLib.TriggerOutput(self, "Recall Y", 0)
+		WireLib.TriggerOutput(self, "Recall Z", 0)
+		WireLib.TriggerOutput(self, "Recall Vector", Vector(0,0,0))
 	end
 
 	self:NextThink(CurTime()+0.04)

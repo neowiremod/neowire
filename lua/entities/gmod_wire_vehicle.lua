@@ -10,8 +10,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs( self, { "Throttle", "Steering", "Handbrake", "Engine", "Lock", "Vehicle [ENTITY]" } )
-	self.Outputs = Wire_CreateOutputs( self, { "Vehicle [ENTITY]" } )
+	self.Inputs = WireLib.CreateInputs( self, { "Throttle", "Steering", "Handbrake", "Engine", "Lock", "Vehicle [ENTITY]" } )
+	self.Outputs = WireLib.CreateOutputs( self, { "Vehicle [ENTITY]" } )
 end
 
 function ENT:LinkEnt( pod )

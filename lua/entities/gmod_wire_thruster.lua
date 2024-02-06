@@ -95,7 +95,7 @@ function ENT:Initialize()
 
 	self:Switch( false )
 
-	self.Inputs = Wire_CreateInputs(self, { "A" })
+	self.Inputs = WireLib.CreateInputs(self, { "A" })
 
 	self.soundname = Sound( "PhysicsCannister.ThrusterLoop" )
 end

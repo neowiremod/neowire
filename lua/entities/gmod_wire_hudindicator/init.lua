@@ -28,7 +28,7 @@ function ENT:Initialize()
 	self.RegisteredPlayers = {}
 	self.PrefixText = "(Hud) Color = "
 
-	self.Inputs = Wire_CreateInputs(self, { "A", "HideHUD" })
+	self.Inputs = WireLib.CreateInputs(self, { "A", "HideHUD" })
 end
 
 function ENT:Setup(a, ar, ag, ab, aa, b, br, bg, bb, ba, material, showinhud, huddesc, hudaddname, hudshowvalue, hudstyle, allowhook, fullcircleangle)
@@ -77,7 +77,7 @@ function ENT:HUDSetup(showinhud, huddesc, hudaddname, hudshowvalue, hudstyle, al
 		self:UnRegisterPlayer(ply)
 
 		-- Adjust inputs back to normal
-		--Wire_AdjustInputs(self, { "A" })
+		--WireLib.AdjustInputs(self, { "A" })
 	elseif (showinhud) then
 		-- Basic style is useless without a value
 		-- to show so set a default if necessary
@@ -102,7 +102,7 @@ function ENT:HUDSetup(showinhud, huddesc, hudaddname, hudshowvalue, hudstyle, al
 
 		-- Adjust inputs accordingly
 		--[[ if (!self.Inputs.HideHUD) then
-			Wire_AdjustInputs(self, { "A", "HideHUD" })
+			WireLib.AdjustInputs(self, { "A", "HideHUD" })
 			self:TriggerInput("HideHUD", 0)
 			self.PrevHideHUD = false
 		end ]]

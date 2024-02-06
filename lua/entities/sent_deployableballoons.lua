@@ -89,10 +89,10 @@ function ENT:Initialize()
 	self.popable = true
 	self.rl = 64
 	if WireAddon then
-		self.Inputs = Wire_CreateInputs(self,{ "Force", "Length", "Weld?", "Popable?", "BalloonType", "Deploy" })
+		self.Inputs = WireLib.CreateInputs(self,{ "Force", "Length", "Weld?", "Popable?", "BalloonType", "Deploy" })
 		self.Outputs=WireLib.CreateSpecialOutputs(self, { "Deployed", "BalloonEntity" }, {"NORMAL","ENTITY" })
-		Wire_TriggerOutput(self,"Deployed", self.Deployed)
-		--Wire_TriggerOutput(self,"Force", self.force)
+		WireLib.TriggerOutput(self,"Deployed", self.Deployed)
+		--WireLib.TriggerOutput(self,"Force", self.force)
 	end
 	local phys = self:GetPhysicsObject()
 	if(phys:IsValid()) then
@@ -110,13 +110,13 @@ function ENT:TriggerInput(key,value)
 				self:DeployBalloons()
 				self.Deployed = 1
 			end
-			Wire_TriggerOutput(self, "Deployed", self.Deployed)
+			WireLib.TriggerOutput(self, "Deployed", self.Deployed)
 		else
 			if self.Deployed ~= 0 then
 				self:RetractBalloons()
 				self.Deployed = 0
 			end
-			Wire_TriggerOutput(self, "Deployed", self.Deployed)
+			WireLib.TriggerOutput(self, "Deployed", self.Deployed)
 		end
 	elseif (key == "Force") then
 		self.force = value
@@ -209,14 +209,14 @@ function ENT:DeployBalloons()
 	self.Balloon = balloon
 	self:UpdatePopable()
 	balloon_registry[balloon] = self
-	Wire_TriggerOutput(self, "BalloonEntity", self.Balloon)
+	WireLib.TriggerOutput(self, "BalloonEntity", self.Balloon)
 end
 
 function ENT:OnRemove()
 	if self.Balloon then
 		balloon_registry[self.Balloon] = nil
 	end
-	Wire_Remove(self)
+	WireLib.Remove(self)
 end
 
 function ENT:RetractBalloons()

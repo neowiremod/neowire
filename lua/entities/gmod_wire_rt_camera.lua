@@ -15,7 +15,7 @@ function ENT:Initialize()
 		self:SetCollisionGroup( COLLISION_GROUP_WEAPON )
 
 		--self.health = rtcam.cameraHealth
-		self.Inputs = Wire_CreateInputs( self, {"Active", "FOV"} )
+		self.Inputs = WireLib.CreateInputs( self, {"Active", "FOV"} )
 	end
 
     self.IsObserved = false

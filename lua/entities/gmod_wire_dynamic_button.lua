@@ -43,8 +43,8 @@ function ENT:Initialize()
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
 
-	self.Outputs = Wire_CreateOutputs(self, { "Out" })
-	self.Inputs = Wire_CreateInputs(self, { "Set" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Out" })
+	self.Inputs = WireLib.CreateInputs(self, { "Set" })
 end
 
 function ENT:TriggerInput(iname, value)
@@ -114,7 +114,7 @@ function ENT:Setup(toggle, value_on, value_off, description, entityout, material
 	self.off_b = off_b
 
 	self:ShowOutput(self.value_off)
-	Wire_TriggerOutput(self, "Out", self.value_off)
+	WireLib.TriggerOutput(self, "Out", self.value_off)
 
     self:SetMaterial(self.material_off)
     self:SetColor(Color(self.off_r, self.off_g, self.off_b, 255))
@@ -125,18 +125,18 @@ function ENT:Setup(toggle, value_on, value_off, description, entityout, material
 			"EntID (The entity ID of the player who pressed the button) [NORMAL]" ,
 			"Entity (The player who pressed the button) [ENTITY]"
 		})
-		Wire_TriggerOutput(self, "EntID", 0)
-		Wire_TriggerOutput(self, "Entity", nil)
+		WireLib.TriggerOutput(self, "EntID", 0)
+		WireLib.TriggerOutput(self, "Entity", nil)
 		self.OutputEntID=true
 	else
-		Wire_AdjustOutputs(self, { "Out" })
+		WireLib.AdjustOutputs(self, { "Out" })
 		self.OutputEntID=false
 	end
 
 	if toggle then
-		Wire_AdjustInputs(self, { "Set" })
+		WireLib.AdjustInputs(self, { "Set" })
 	else
-		Wire_AdjustInputs(self, {})
+		WireLib.AdjustInputs(self, {})
 	end
 end
 
@@ -159,10 +159,10 @@ function ENT:Switch(on)
 		if self.OutputEntID then self.EntToOutput = NULL end
 	end
 
-	Wire_TriggerOutput(self, "Out", self.Value)
+	WireLib.TriggerOutput(self, "Out", self.Value)
 	if self.OutputEntID then
-		Wire_TriggerOutput(self, "EntID", self.EntToOutput:EntIndex())
-		Wire_TriggerOutput(self, "Entity", self.EntToOutput)
+		WireLib.TriggerOutput(self, "EntID", self.EntToOutput:EntIndex())
+		WireLib.TriggerOutput(self, "Entity", self.EntToOutput)
 	end
 	return true
 end

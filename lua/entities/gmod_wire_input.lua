@@ -22,7 +22,7 @@ function ENT:Initialize()
 	self.OnUpImpulse = nil
 	self.OnDownImpulse = nil
 
-	self.Outputs = Wire_CreateOutputs(self, { "Out" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Out" })
 end
 
 function ENT:Setup(keygroup, toggle, value_off, value_on)
@@ -43,7 +43,7 @@ function ENT:Setup(keygroup, toggle, value_off, value_on)
 
 
 	self:ShowOutput(self.value_off)
-	Wire_TriggerOutput(self, "Out", self.value_off)
+	WireLib.TriggerOutput(self, "Out", self.value_off)
 end
 
 function ENT:InputActivate( mul )
@@ -73,7 +73,7 @@ function ENT:Switch( on, mul )
 		self.Value = self.value_off
 	end
 
-	Wire_TriggerOutput(self, "Out", self.Value)
+	WireLib.TriggerOutput(self, "Out", self.Value)
 
 	return true
 end

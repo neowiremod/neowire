@@ -10,7 +10,7 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs( self, { "Trigger" } )
+	self.Inputs = WireLib.CreateInputs( self, { "Trigger" } )
 	self.Trigger = 0
 	self.damage = 0
 end

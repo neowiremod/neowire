@@ -14,7 +14,7 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self, { "A", "Length", "Extinguish" })
+	self.Inputs = WireLib.CreateInputs(self, { "A", "Length", "Extinguish" })
 	self.IgniteLength = 10
 	self:Setup(false, 2048)
 end

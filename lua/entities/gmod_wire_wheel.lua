@@ -20,7 +20,7 @@ function ENT:Initialize()
 	self.SpeedMod = 0
 	self.Go = 0
 
-	self.Inputs = Wire_CreateInputs(self, { "A: Go", "B: Break", "C: SpeedMod" })
+	self.Inputs = WireLib.CreateInputs(self, { "A: Go", "B: Break", "C: SpeedMod" })
 end
 
 function ENT:Setup(fwd, bck, stop, torque, direction, axis)

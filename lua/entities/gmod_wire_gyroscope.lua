@@ -51,9 +51,9 @@ end
 function ENT:Setup( out180 )
 	if out180 ~= nil then self:SetOut180(out180) end
 
-	Wire_TriggerOutput(self, "Pitch", 0)
-	Wire_TriggerOutput(self, "Yaw", 0)
-	Wire_TriggerOutput(self, "Roll", 0)
+	WireLib.TriggerOutput(self, "Pitch", 0)
+	WireLib.TriggerOutput(self, "Yaw", 0)
+	WireLib.TriggerOutput(self, "Roll", 0)
 	WireLib.TriggerOutput(self, "Angle", Angle( 0, 0, 0 ))
 end
 
@@ -65,10 +65,10 @@ function ENT:Think()
 	if (ang.y < 0 and not self:GetOut180()) then ang.y = ang.y + 360 end
 	if (ang.r < 0 and not self:GetOut180()) then ang.r = ang.r + 360
 	elseif (ang.r > 180 and self:GetOut180()) then ang.r = ang.r - 360 end
-	Wire_TriggerOutput(self, "Pitch", ang.p)
-	Wire_TriggerOutput(self, "Yaw", ang.y)
-	Wire_TriggerOutput(self, "Roll", ang.r)
-	Wire_TriggerOutput(self, "Angle", Angle( ang.p, ang.y, ang.r ))
+	WireLib.TriggerOutput(self, "Pitch", ang.p)
+	WireLib.TriggerOutput(self, "Yaw", ang.y)
+	WireLib.TriggerOutput(self, "Roll", ang.r)
+	WireLib.TriggerOutput(self, "Angle", Angle( ang.p, ang.y, ang.r ))
 	--now handled client side (TAD2020)
 	--self:ShowOutput(ang.p, ang.y, ang.r)
 

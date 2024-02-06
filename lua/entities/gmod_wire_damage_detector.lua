@@ -83,7 +83,7 @@ end
 
 function ENT:OnRemove()
 	Wire_Damage_Detectors[self] = nil
-	Wire_Remove(self)
+	WireLib.Remove(self)
 	self:ClearEntities()
 end
 

@@ -52,7 +52,7 @@ function ENT:Initialize()
 	self.Inputs = WireLib.CreateSpecialInputs(self, { "Spawn", "Undo", "UndoEnt", "SpawnEffect" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL" })
 	self.Outputs = WireLib.CreateSpecialOutputs(self, { "Out", "LastSpawned", "Props" }, { "NORMAL", "ENTITY", "ARRAY" })
 
-	Wire_TriggerOutput(self, "Props", self.UndoList)
+	WireLib.TriggerOutput(self, "Props", self.UndoList)
 end
 
 function ENT:Setup( delay, undo_delay, spawn_effect, mat, r, g, b, a, skin )
@@ -151,10 +151,10 @@ function ENT:DoSpawn( pl, down )
 	table.insert( self.UndoList, 1, prop )
 	GlobalUndoList[prop] = self
 
-	Wire_TriggerOutput(self, "LastSpawned", prop)
+	WireLib.TriggerOutput(self, "LastSpawned", prop)
 	self.CurrentPropCount = #self.UndoList
-	Wire_TriggerOutput(self, "Out", self.CurrentPropCount)
-	Wire_TriggerOutput(self, "Props", self.UndoList)
+	WireLib.TriggerOutput(self, "Out", self.CurrentPropCount)
+	WireLib.TriggerOutput(self, "Props", self.UndoList)
 	self:ShowOutput()
 
 	self.DisabledByTouch = true
@@ -201,8 +201,8 @@ function ENT:CheckEnts(removed_entity)
 	-- Check to see if active prop count has changed
 	if (#self.UndoList ~= self.CurrentPropCount) then
 		self.CurrentPropCount = #self.UndoList
-		Wire_TriggerOutput(self, "Out", self.CurrentPropCount)
-		Wire_TriggerOutput(self, "Props", self.UndoList)
+		WireLib.TriggerOutput(self, "Out", self.CurrentPropCount)
+		WireLib.TriggerOutput(self, "Props", self.UndoList)
 		self:ShowOutput()
 	end
 end

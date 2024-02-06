@@ -13,8 +13,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs(self, { "Target" })
-	self.Outputs = Wire_CreateOutputs(self, { "Out" })
+	self.Inputs = WireLib.CreateInputs(self, { "Target" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Out" })
 end
 
 function ENT:Setup(xyz_mode, outdist, outbrng, gpscord, direction_vector, direction_normalized, target_velocity, velocity_normalized)
@@ -62,7 +62,7 @@ function ENT:Setup(xyz_mode, outdist, outbrng, gpscord, direction_vector, direct
 	    table.insert(onames, "Velocity_Z")
 	end
 
-	Wire_AdjustOutputs(self, onames)
+	WireLib.AdjustOutputs(self, onames)
 	self:TriggerOutputs(0, Angle(0, 0, 0),Vector(0, 0, 0),Vector(0, 0, 0),Vector(0, 0, 0),Vector(0,0,0))
 	self:ShowOutput()
 end
@@ -136,17 +136,17 @@ end
 
 function ENT:TriggerOutputs(dist, brng, distc, gpscords,dirvec,velo)
     if (self.outdist) then
-		Wire_TriggerOutput(self, "Distance", dist)
+		WireLib.TriggerOutput(self, "Distance", dist)
 	end
 	if (self.xyz_mode) then
-	    Wire_TriggerOutput(self, "X", distc.x)
-	    Wire_TriggerOutput(self, "Y", distc.y)
-	    Wire_TriggerOutput(self, "Z", distc.z)
+	    WireLib.TriggerOutput(self, "X", distc.x)
+	    WireLib.TriggerOutput(self, "Y", distc.y)
+	    WireLib.TriggerOutput(self, "Z", distc.z)
 	end
 	if (self.gpscord) then
-	    Wire_TriggerOutput(self, "World_X", gpscords.x)
-	    Wire_TriggerOutput(self, "World_Y", gpscords.y)
-	    Wire_TriggerOutput(self, "World_Z", gpscords.z)
+	    WireLib.TriggerOutput(self, "World_X", gpscords.x)
+	    WireLib.TriggerOutput(self, "World_Y", gpscords.y)
+	    WireLib.TriggerOutput(self, "World_Z", gpscords.z)
 	end
 	if (self.outbrng) then
 		local pitch = brng.p
@@ -155,18 +155,18 @@ function ENT:TriggerOutputs(dist, brng, distc, gpscords,dirvec,velo)
 		if (pitch > 180) then pitch = pitch - 360 end
 		if (yaw > 180) then yaw = yaw - 360 end
 
-		Wire_TriggerOutput(self, "Bearing", -yaw)
-	    Wire_TriggerOutput(self, "Elevation", -pitch)
+		WireLib.TriggerOutput(self, "Bearing", -yaw)
+	    WireLib.TriggerOutput(self, "Elevation", -pitch)
 	end
 	if(self.direction_vector) then
-	    Wire_TriggerOutput(self, "Direction_X", dirvec.x)
-	    Wire_TriggerOutput(self, "Direction_Y", dirvec.y)
-	    Wire_TriggerOutput(self, "Direction_Z", dirvec.z)
+	    WireLib.TriggerOutput(self, "Direction_X", dirvec.x)
+	    WireLib.TriggerOutput(self, "Direction_Y", dirvec.y)
+	    WireLib.TriggerOutput(self, "Direction_Z", dirvec.z)
 	end
 	if(self.target_velocity) then
-	    Wire_TriggerOutput(self, "Velocity_X", velo.x)
-	    Wire_TriggerOutput(self, "Velocity_Y", velo.y)
-	    Wire_TriggerOutput(self, "Velocity_Z", velo.z)
+	    WireLib.TriggerOutput(self, "Velocity_X", velo.x)
+	    WireLib.TriggerOutput(self, "Velocity_Y", velo.y)
+	    WireLib.TriggerOutput(self, "Velocity_Z", velo.z)
 	end
 end
 

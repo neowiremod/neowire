@@ -9,8 +9,8 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self,{"Reset"})
-	self.Outputs = Wire_CreateOutputs(self,{"Out"})
+	self.Inputs = WireLib.CreateInputs(self,{"Reset"})
+	self.Outputs = WireLib.CreateOutputs(self,{"Out"})
 end
 
 function ENT:Setup(key_more,key_less,toggle,value_min,value_max,value_start,speed)
@@ -30,7 +30,7 @@ function ENT:Setup(key_more,key_less,toggle,value_min,value_max,value_start,spee
 	self.value_start = value_start
 	self.speed = speed
 	self:ShowOutput()
-	Wire_TriggerOutput(self,"Out",self.Value)
+	WireLib.TriggerOutput(self,"Out",self.Value)
 end
 
 function ENT:TriggerInput(iname, value)
@@ -38,7 +38,7 @@ function ENT:TriggerInput(iname, value)
         if(value ~= 0)then
             self.Value = self.value_start
             self:ShowOutput()
-	        Wire_TriggerOutput(self,"Out",self.Value)
+	        WireLib.TriggerOutput(self,"Out",self.Value)
 	    end
 	end
 end
@@ -78,7 +78,7 @@ function ENT:Think()
 			self.Value = self.value_max
 		end
 		self:ShowOutput()
-		Wire_TriggerOutput(self,"Out",self.Value)
+		WireLib.TriggerOutput(self,"Out",self.Value)
 		self:NextThink(CurTime()+0.02)
 		return true
 	end

@@ -10,8 +10,8 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self, {"Set", "Length","StartSize","EndSize","R","G","B","A"})
-	self.Outputs = Wire_CreateOutputs(self, {})
+	self.Inputs = WireLib.CreateInputs(self, {"Set", "Length","StartSize","EndSize","R","G","B","A"})
+	self.Outputs = WireLib.CreateOutputs(self, {})
 
 	self.Trail = {
 		Color = Color(255, 255, 255, 255),

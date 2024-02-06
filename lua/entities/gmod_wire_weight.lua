@@ -11,8 +11,8 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self,{"Weight"})
-	self.Outputs = Wire_CreateOutputs(self,{"Weight"})
+	self.Inputs = WireLib.CreateInputs(self,{"Weight"})
+	self.Outputs = WireLib.CreateOutputs(self,{"Weight"})
 	self:ShowOutput(self:GetPhysicsObject():GetMass())
 end
 
@@ -24,7 +24,7 @@ function ENT:TriggerInput(iname,value)
 			phys:SetMass(value)
 			phys:Wake()
 			self:ShowOutput(value)
-			Wire_TriggerOutput(self,"Weight",value)
+			WireLib.TriggerOutput(self,"Weight",value)
 		end
 	end
 	return true

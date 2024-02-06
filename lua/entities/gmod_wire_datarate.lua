@@ -10,8 +10,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
-	self.Outputs = Wire_CreateOutputs(self, {"Output","HiSpeed_DataRate","Wire_DataRate"})
-	self.Inputs = Wire_CreateInputs(self,{"Input","Smooth", "Interval"})
+	self.Outputs = WireLib.CreateOutputs(self, {"Output","HiSpeed_DataRate","Wire_DataRate"})
+	self.Inputs = WireLib.CreateInputs(self,{"Input","Smooth", "Interval"})
 
 	self.Memory = nil
 	self.Smooth = 0.1
@@ -34,8 +34,8 @@ function ENT:Think()
 	self.HDataRate = (self.HDataRate*(2-self.Smooth) + self.HDataBytes * (1/self.Interval) * (self.Smooth)) / 2
 	self.HDataBytes = 0
 
-	Wire_TriggerOutput(self, "HiSpeed_DataRate", self.HDataRate)
-	Wire_TriggerOutput(self, "Wire_DataRate", self.WDataRate)
+	WireLib.TriggerOutput(self, "HiSpeed_DataRate", self.HDataRate)
+	WireLib.TriggerOutput(self, "Wire_DataRate", self.WDataRate)
 
 	self:SetOverlayText("Hi-Speed data rate: "..math.floor(self.HDataRate).." bps\nWire data rate: "..math.floor(self.WDataRate).." bps")
 	self:NextThink(CurTime()+self.Interval)
@@ -79,7 +79,7 @@ function ENT:TriggerInput(iname, value)
 	if (iname == "Input") then
 		self.Memory = self.Inputs.Input.Src
 		self.WDataBytes = self.WDataBytes + 1
-		Wire_TriggerOutput(self, "Output", value)
+		WireLib.TriggerOutput(self, "Output", value)
 	elseif (iname == "Smooth") then
 		self.Smooth = 2*(1-math.Clamp(value,0,1))
 	elseif (iname == "Interval") then

@@ -11,8 +11,8 @@ function ENT:Initialize()
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
 
-	self.Outputs = Wire_CreateOutputs(self, { "Port0","Port1","Port2","Port3","Port4","Port5","Port6","Port7" })
-	self.Inputs = Wire_CreateInputs(self, { "Port0","Port1","Port2","Port3","Port4","Port5","Port6","Port7" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Port0","Port1","Port2","Port3","Port4","Port5","Port6","Port7" })
+	self.Inputs = WireLib.CreateInputs(self, { "Port0","Port1","Port2","Port3","Port4","Port5","Port6","Port7" })
 
 	self.Ports = {}
 	for i = 0,7 do
@@ -28,7 +28,7 @@ function ENT:Think()
 
 	for i = 0,7 do
 		if self.OutPorts[i] then
-			Wire_TriggerOutput(self, "Port"..i, self.OutPorts[i])
+			WireLib.TriggerOutput(self, "Port"..i, self.OutPorts[i])
 			self.OutPorts[i] = nil
 		end
 	end

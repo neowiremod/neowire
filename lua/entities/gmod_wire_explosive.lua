@@ -27,11 +27,11 @@ function ENT:Initialize()
 	self.ReloadTime = 0
 	self.CountTime = 0
 
-	self.Inputs = Wire_CreateInputs(self, { "Detonate", "ResetHealth" })
+	self.Inputs = WireLib.CreateInputs(self, { "Detonate", "ResetHealth" })
 
 	self:SetMaxHealth(100)
 	self:SetHealth(100)
-	self.Outputs = Wire_CreateOutputs(self, { "Health" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Health" })
 end
 
 function ENT:TriggerInput(iname, value)
@@ -73,7 +73,7 @@ function ENT:Setup( key, damage, delaytime, removeafter, radius, affectother, no
 
 	--[[
 	self:SetHealth(maxhealth)
-	Wire_TriggerOutput(self, "Health", maxhealth)
+	WireLib.TriggerOutput(self, "Health", maxhealth)
 
 	reset everthing back and try to stop exploding
 	self.exploding = false
@@ -115,7 +115,7 @@ end
 
 function ENT:ResetHealth()
 	self:SetHealth( self:GetMaxHealth() )
-	Wire_TriggerOutput(self, "Health", self:GetMaxHealth())
+	WireLib.TriggerOutput(self, "Health", self:GetMaxHealth())
 
 	-- put the fires out and try to stop exploding
 	self.exploding = false
@@ -145,7 +145,7 @@ function ENT:OnTakeDamage( dmginfo )
 		local h = self:Health() - dammage
 		if (h < 0) then h = 0 end
 		self:SetHealth(h)
-		Wire_TriggerOutput(self, "Health", h)
+		WireLib.TriggerOutput(self, "Health", h)
 		self:ShowOutput()
 		if (self.ColorEffect) then
 			local c = h == 0 and 0 or 255 * (h / self:GetMaxHealth())

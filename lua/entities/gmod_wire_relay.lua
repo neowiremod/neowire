@@ -15,8 +15,8 @@ function ENT:Initialize()
 	self.Value = {}		-- stores current output value
 	self.Last = {}		-- stores last input value for each input
 
-	self.Inputs = Wire_CreateInputs(self, { "1A", "2A", "Switch" })
-	self.Outputs = Wire_CreateOutputs(self, { "A" })
+	self.Inputs = WireLib.CreateInputs(self, { "1A", "2A", "Switch" })
+	self.Outputs = WireLib.CreateOutputs(self, { "A" })
 end
 
 function ENT:Setup(keygroup1, keygroup2, keygroup3, keygroup4, keygroup5, keygroupoff, toggle, normclose, poles, throws, nokey)
@@ -57,8 +57,8 @@ function ENT:Setup(keygroup1, keygroup2, keygroup3, keygroup4, keygroup5, keygro
 	--add switch input to end of input list
 	table.insert(inputs, "Switch")
 
-	Wire_AdjustInputs(self, inputs)
-	Wire_AdjustOutputs(self, self.outputs)
+	WireLib.AdjustInputs(self, inputs)
+	WireLib.AdjustOutputs(self, self.outputs)
 
 	--set the switch to its new normal state
 	self:Switch( normclose )
@@ -110,7 +110,7 @@ function ENT:Switch( mul )
 	self.selinput = mul
 	for p,v in ipairs(self.outputs) do
 		self.Value[p] = self.Last[ mul .. v ] or 0
-		Wire_TriggerOutput(self, v, self.Value[p])
+		WireLib.TriggerOutput(self, v, self.Value[p])
 	end
 	self:ShowOutput()
 	return true
