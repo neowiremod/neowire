@@ -1,47 +1,56 @@
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_wire_entity" )
-ENT.PrintName       = "Wire User"
-ENT.RenderGroup		= RENDERGROUP_BOTH
-ENT.WireDebugName	= "User"
-
+DEFINE_BASECLASS("base_wire_entity")
+ENT.PrintName = "Wire User"
+ENT.RenderGroup = RENDERGROUP_BOTH
+ENT.WireDebugName = "User"
 function ENT:SetupDataTables()
-	self:NetworkVar( "Float", 0, "BeamLength" )
+	self:NetworkVar("Float", 0, "BeamLength")
 end
 
-if CLIENT then return end -- No more client
+if CLIENT then -- No more client
+	return
+end
 
 function ENT:Initialize()
-	self:PhysicsInit( SOLID_VPHYSICS )
-	self:SetMoveType( MOVETYPE_VPHYSICS )
-	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = WireLib.CreateInputs(self, {"Fire"})
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:SetSolid(SOLID_VPHYSICS)
+	self.Inputs = WireLib.CreateInputs(self, { "Fire" })
 	self:Setup(2048)
 end
 
 function ENT:Setup(Range)
-	if Range then self:SetBeamLength(Range) end
+	if Range then
+		self:SetBeamLength(Range)
+	end
 end
+
 function ENT:TriggerInput(iname, value)
 	if iname == "Fire" and value ~= 0 then
 		local vStart = self:GetPos()
-
-		local trace = util.TraceLine( {
+		local trace = util.TraceLine({
 			start = vStart,
 			endpos = vStart + (self:GetUp() * self:GetBeamLength()),
 			filter = { self },
 		})
 
-		if not IsValid(trace.Entity) then return false end
+		if not IsValid(trace.Entity) then
+			return false
+		end
 		local ply = self:GetPlayer()
-		if not IsValid(ply) then ply = self end
-
-		if hook.Run( "PlayerUse", ply, trace.Entity ) == false then return false end
-		if hook.Run( "WireUse", ply, trace.Entity, self ) == false then return false end
-
+		if not IsValid(ply) then
+			ply = self
+		end
+		if hook.Run("PlayerUse", ply, trace.Entity) == false then
+			return false
+		end
+		if hook.Run("WireUse", ply, trace.Entity, self) == false then
+			return false
+		end
 		if trace.Entity.Use then
-			trace.Entity:Use(ply,ply,USE_ON,0)
+			trace.Entity:Use(ply, ply, USE_ON, 0)
 		else
-			trace.Entity:Fire("use","1",0)
+			trace.Entity:Fire("use", "1", 0)
 		end
 	end
 end

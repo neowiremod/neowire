@@ -1,9 +1,7 @@
 --[[
 		Bitwise Gates
 ]]
-
 GateActions("Bitwise")
-
 GateActions["bnot"] = {
 	name = "Not",
 	inputs = { "A" },
@@ -11,8 +9,8 @@ GateActions["bnot"] = {
 		return bit.bnot(A)
 	end,
 	label = function(Out, A)
-		return "not "..A.." = "..Out
-	end
+		return "not " .. A .. " = " .. Out
+	end,
 }
 
 GateActions["bor"] = {
@@ -22,8 +20,8 @@ GateActions["bor"] = {
 		return bit.bor(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." or "..B.." = "..Out
-	end
+		return A .. " or " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["band"] = {
@@ -33,8 +31,8 @@ GateActions["band"] = {
 		return bit.band(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." and "..B.." = "..Out
-	end
+		return A .. " and " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["bxor"] = {
@@ -44,8 +42,8 @@ GateActions["bxor"] = {
 		return bit.bxor(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." xor "..B.." = "..Out
-	end
+		return A .. " xor " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["bshr"] = {
@@ -55,8 +53,8 @@ GateActions["bshr"] = {
 		return bit.rshift(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." >> "..B.." = "..Out
-	end
+		return A .. " >> " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["bshl"] = {
@@ -66,8 +64,8 @@ GateActions["bshl"] = {
 		return bit.lshift(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." << "..B.." = "..Out
-	end
+		return A .. " << " .. B .. " = " .. Out
+	end,
 }
 
 GateActions()

@@ -1,33 +1,32 @@
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_wire_entity" )
-ENT.PrintName       = "Wire Gate"
+DEFINE_BASECLASS("base_wire_entity")
+ENT.PrintName = "Wire Gate"
 ENT.WireDebugName = "Gate"
-
-if CLIENT then return end -- No more client
+if CLIENT then -- No more client
+	return
+end
 
 local Wire_EnableGateInputValues = CreateConVar("Wire_EnableGateInputValues", 1, FCVAR_ARCHIVE)
-
 function ENT:Initialize()
-	self:PhysicsInit( SOLID_VPHYSICS )
-	self:SetMoveType( MOVETYPE_VPHYSICS )
-	self:SetSolid( SOLID_VPHYSICS )
-
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:SetSolid(SOLID_VPHYSICS)
 	self.Inputs = {}
 	self.Outputs = {}
 end
 
-function ENT:Setup( action, noclip )
+function ENT:Setup(action, noclip)
 	local gate = GateActions[action]
-	if not gate then return end
-	if GateActions[action].is_banned then return end
-
+	if not gate then
+		return
+	end
+	if GateActions[action].is_banned then
+		return
+	end
 	self.Updating = true
-
 	self.action = action
-
 	self.WireDebugName = gate.name
-
-	WireLib.AdjustSpecialInputs(self, gate.inputs, gate.inputtypes )
+	WireLib.AdjustSpecialInputs(self, gate.inputs, gate.inputtypes)
 	if gate.outputs then
 		WireLib.AdjustSpecialOutputs(self, gate.outputs, gate.outputtypes)
 	else
@@ -38,11 +37,10 @@ function ENT:Setup( action, noclip )
 	if gate.reset then
 		gate.reset(self)
 	end
-
 	local ReadCell = gate.ReadCell
 	if ReadCell then
 		function self:ReadCell(Address)
-			return ReadCell(gate,self,Address)
+			return ReadCell(gate, self, Address)
 		end
 	else
 		self.ReadCell = nil
@@ -50,29 +48,24 @@ function ENT:Setup( action, noclip )
 
 	local WriteCell = gate.WriteCell
 	if WriteCell then
-		function self:WriteCell(Address,value)
-			return WriteCell(gate,self,Address,value)
+		function self:WriteCell(Address, value)
+			return WriteCell(gate, self, Address, value)
 		end
 	else
 		self.WriteCell = nil
 	end
 
 	if noclip then
-		self:SetCollisionGroup( COLLISION_GROUP_WORLD )
+		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 	end
 	self.noclip = noclip
-
 	self.Action = gate
 	self.PrevValue = nil
-
 	--self.Action.inputtypes = self.Action.inputtypes or {}
-
 	self.Updating = nil
-
 	self:CalcOutput()
 	self:ShowOutput()
 end
-
 
 function ENT:OnInputWireLink(iname, itype, src, oname, otype)
 	if self.Action and self.Action.OnInputWireLink then
@@ -87,7 +80,9 @@ function ENT:OnOutputWireLink(oname, otype, dst, iname, itype)
 end
 
 function ENT:TriggerInput(iname, value, iter)
-	if self.Updating then return end
+	if self.Updating then
+		return
+	end
 	if self.Action and not self.Action.timed then
 		self:CalcOutput(iter)
 		self:ShowOutput()
@@ -96,28 +91,23 @@ end
 
 function ENT:Think()
 	BaseClass.Think(self)
-
 	if self.Action and self.Action.timed then
 		self:CalcOutput()
 		self:ShowOutput()
-
-		self:NextThink(CurTime()+0.02)
+		self:NextThink(CurTime() + 0.02)
 		return true
 	end
 end
-
 
 function ENT:CalcOutput(iter)
 	if self.Action and self.Action.output then
 		if self.Action.outputs then
 			local result = { self.Action.output(self, unpack(self:GetActionInputs(), 1, #self.Action.inputs)) }
-
-			for k,v in ipairs(self.Action.outputs) do
+			for k, v in ipairs(self.Action.outputs) do
 				WireLib.TriggerOutput(self, v, result[k] or WireLib.GetDefaultForType(self.Outputs[v].Type), iter)
 			end
 		else
 			local value = self.Action.output(self, unpack(self:GetActionInputs(), 1, #self.Action.inputs)) or WireLib.GetDefaultForType(self.Outputs.Out.Type)
-
 			WireLib.TriggerOutput(self, "Out", value, iter)
 		end
 	end
@@ -125,11 +115,10 @@ end
 
 function ENT:ShowOutput()
 	local txt
-
 	if self.Action then
-		txt = (self.Action.name or "No Name")
+		txt = self.Action.name or "No Name"
 		if self.Action.label then
-			txt = txt.."\n"..self.Action.label(self:GetActionOutputs(), unpack(self:GetActionInputs(Wire_EnableGateInputValues:GetBool()), 1, #self.Action.inputs))
+			txt = txt .. "\n" .. self.Action.label(self:GetActionOutputs(), unpack(self:GetActionInputs(Wire_EnableGateInputValues:GetBool()), 1, #self.Action.inputs))
 		end
 	else
 		txt = "Invalid gate!"
@@ -138,23 +127,19 @@ function ENT:ShowOutput()
 	self:SetOverlayText(txt)
 end
 
-
 function ENT:OnRestore()
 	self.Action = GateActions[self.action]
-
 	BaseClass.OnRestore(self)
 end
 
-
 function ENT:GetActionInputs(as_names)
 	local Args = {}
-
 	if self.Action.compact_inputs then
 		-- If a gate has compact inputs (like Arithmetic - Add), nil inputs are truncated so {0, nil, nil, 5, nil, 1} becomes {0, 5, 1}
-		for k,v in ipairs(self.Action.inputs) do
+		for k, v in ipairs(self.Action.inputs) do
 			local input = self.Inputs[v]
 			if not input then
-				ErrorNoHalt("Wire Gate ("..self.action..") error: Missing input! ("..k..","..v..")\n")
+				ErrorNoHalt("Wire Gate (" .. self.action .. ") error: Missing input! (" .. k .. "," .. v .. ")\n")
 				return {}
 			end
 
@@ -169,16 +154,16 @@ function ENT:GetActionInputs(as_names)
 
 		while #Args < self.Action.compact_inputs do
 			if as_names then
-				table.insert(Args, self.Action.inputs[#Args+1] or "*Not enough inputs*")
+				table.insert(Args, self.Action.inputs[#Args + 1] or "*Not enough inputs*")
 			else
-				table.insert( Args, WireLib.GetDefaultForType(self.Inputs[ self.Action.inputs[#Args+1] ].Type) )
+				table.insert(Args, WireLib.GetDefaultForType(self.Inputs[self.Action.inputs[#Args + 1]].Type))
 			end
 		end
 	else
-		for k,v in ipairs(self.Action.inputs) do
+		for k, v in ipairs(self.Action.inputs) do
 			local input = self.Inputs[v]
 			if not input then
-				ErrorNoHalt("Wire Gate ("..self.action..") error: Missing input! ("..k..","..v..")\n")
+				ErrorNoHalt("Wire Gate (" .. self.action .. ") error: Missing input! (" .. k .. "," .. v .. ")\n")
 				return {}
 			end
 
@@ -189,27 +174,33 @@ function ENT:GetActionInputs(as_names)
 			end
 		end
 	end
-
 	return Args
 end
 
 function ENT:GetActionOutputs()
 	if self.Action.outputs then
 		local result = {}
-		for _,v in ipairs(self.Action.outputs) do
+		for _, v in ipairs(self.Action.outputs) do
 			result[v] = self.Outputs[v].Value or WireLib.GetDefaultForType(self.Outputs[v].Type)
 		end
-
 		return result
 	end
-
 	return self.Outputs.Out.Value or WireLib.GetDefaultForType(self.Outputs.Out.Type)
 end
 
 function WireLib.MakeWireGate(pl, Pos, Ang, model, action, noclip, frozen, nocollide)
-	if not GateActions[action] then return end
-	if GateActions[action].is_banned then return end
-
-	return WireLib.MakeWireEnt(pl, { Class = "gmod_wire_gate", Pos=Pos, Angle=Ang, Model=model }, action, noclip)
+	if not GateActions[action] then
+		return
+	end
+	if GateActions[action].is_banned then
+		return
+	end
+	return WireLib.MakeWireEnt(pl, {
+		Class = "gmod_wire_gate",
+		Pos = Pos,
+		Angle = Ang,
+		Model = model,
+	}, action, noclip)
 end
+
 duplicator.RegisterEntityClass("gmod_wire_gate", WireLib.MakeWireGate, "Pos", "Ang", "Model", "action", "noclip")

@@ -1,12 +1,9 @@
-include('shared.lua')
-
+include("shared.lua")
 ENT.gmod_wire_egp = true
-
 function ENT:Initialize()
-	self.GPU = GPULib.WireGPU( self )
+	self.GPU = GPULib.WireGPU(self)
 	self.GPU.texture_filtering = TEXFILTER.ANISOTROPIC
 	self.GPU.translucent = self:GetTranslucent()
-
 	self.RenderTable = table.Copy(EGP.HomeScreen)
 	self:_EGP_Update()
 	self.RenderTable = {}
@@ -19,9 +16,8 @@ end
 local egpDraw = EGP.Draw
 function ENT:_EGP_Update()
 	self.NeedsUpdate = false
-
-	self.GPU:RenderToGPU( function()
-		render.Clear( 0, 0, 0, 0, true )
+	self.GPU:RenderToGPU(function()
+		render.Clear(0, 0, 0, 0, true)
 		egpDraw(self)
 	end)
 end
@@ -36,14 +32,12 @@ local VECTOR_1_1_1 = Vector(1, 1, 1)
 function ENT:Draw()
 	self:DrawModel()
 	Wire_Render(self)
-
 	local tone = render.GetToneMappingScaleLinear()
 	render.SetToneMappingScaleLinear(VECTOR_1_1_1)
 	if self.NeedsUpdate then
 		self:_EGP_Update()
 	end
-
-	self.GPU:Render(0,0,1024,1024,nil,-0.5,-0.5)
+	self.GPU:Render(0, 0, 1024, 1024, nil, -0.5, -0.5)
 	render.SetToneMappingScaleLinear(tone)
 end
 

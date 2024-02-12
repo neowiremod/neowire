@@ -1,12 +1,9 @@
 include("shared.lua")
 include("huddraw.lua")
-
 ENT.gmod_wire_egp_hud = true
-
 function ENT:GetEGPMatrix()
 	return Matrix()
 end
-
 
 function ENT:Initialize()
 	self.RenderTable = {}

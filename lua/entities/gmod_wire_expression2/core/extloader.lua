@@ -1,36 +1,34 @@
 --[[
   Loading extensions
 ]]
-
 wire_expression2_PreLoadExtensions()
-
 -- Save E2's metatable for wire_expression2_reload
 if ENT then
-
 	local wire_expression2_ENT = ENT
-
 	function wire_expression2_reload(ply, cmd, args)
-		if IsValid( ply ) and not ply:IsSuperAdmin() and not game.SinglePlayer() then
-			ply:PrintMessage( 2, "Sorry " .. ply:Name() .. ", you don't have access to this command." )
+		if IsValid(ply) and not ply:IsSuperAdmin() and not game.SinglePlayer() then
+			ply:PrintMessage(2, "Sorry " .. ply:Name() .. ", you don't have access to this command.")
 			return
 		end
 
-		local function _Msg( str )
-			if IsValid( ply ) then ply:PrintMessage( 2, str ) end
-			if not game.SinglePlayer() then MsgN( str ) end
+		local function _Msg(str)
+			if IsValid(ply) then
+				ply:PrintMessage(2, str)
+			end
+			if not game.SinglePlayer() then
+				MsgN(str)
+			end
 		end
 
-		timer.Remove( "E2_AutoReloadTimer" )
-
-		_Msg( "Calling destructors for all Expression 2 chips." )
-		local chips = ents.FindByClass( "gmod_wire_expression2" )
-		for _, chip in ipairs( chips ) do
+		timer.Remove("E2_AutoReloadTimer")
+		_Msg("Calling destructors for all Expression 2 chips.")
+		local chips = ents.FindByClass("gmod_wire_expression2")
+		for _, chip in ipairs(chips) do
 			if not chip.error then
 				chip:Destruct()
 			end
 			chip.script = nil
 		end
-
 
 		_Msg("Reloading Expression 2 internals.")
 		include("entities/gmod_wire_expression2/core/e2lib.lua")
@@ -39,40 +37,36 @@ if ENT then
 		include("entities/gmod_wire_expression2/base/tokenizer.lua")
 		include("entities/gmod_wire_expression2/base/parser.lua")
 		include("entities/gmod_wire_expression2/base/compiler.lua")
-
-		_Msg( "Reloading Expression 2 extensions." )
+		_Msg("Reloading Expression 2 extensions.")
 		include("entities/gmod_wire_expression2/core/init.lua")
-
 		ENT = wire_expression2_ENT
 		wire_expression2_is_reload = true
-		include( "entities/gmod_wire_expression2/core/extloader.lua" )
+		include("entities/gmod_wire_expression2/core/extloader.lua")
 		wire_expression2_is_reload = nil
 		ENT = nil
-
-		_Msg( "Calling constructors for all Expression 2 chips." )
+		_Msg("Calling constructors for all Expression 2 chips.")
 		wire_expression2_prepare_functiondata()
 		if not args or args[1] ~= "nosend" then
-			for _, p in ipairs( player.GetAll() ) do
-				if IsValid( p ) then wire_expression2_sendfunctions( p ) end
+			for _, p in ipairs(player.GetAll()) do
+				if IsValid(p) then
+					wire_expression2_sendfunctions(p)
+				end
 			end
 		end
-		for _, chip in ipairs( chips ) do
-			pcall( chip.OnRestore, chip )
+
+		for _, chip in ipairs(chips) do
+			pcall(chip.OnRestore, chip)
 		end
 
-		_Msg( "Done reloading Expression 2 extensions." )
+		_Msg("Done reloading Expression 2 extensions.")
 	end
 
-	concommand.Add( "wire_expression2_reload", wire_expression2_reload )
-
+	concommand.Add("wire_expression2_reload", wire_expression2_reload)
 end
 
 wire_expression2_reset_extensions()
-
 include("extpp.lua")
-
 local included_files
-
 local function e2_include_init()
 	E2Lib.ExtPP.Init()
 	included_files = {}
@@ -89,14 +83,14 @@ end
 -- parses and executes an extension
 local function e2_include_pass2(name, luaname, contents)
 	local preprocessedSource = E2Lib.ExtPP.Pass2(contents, luaname)
-	E2Lib.currentextension = string.StripExtension( string.GetFileFromFilename(name) )
-	if not preprocessedSource then return include(name) end
-
+	E2Lib.currentextension = string.StripExtension(string.GetFileFromFilename(name))
+	if not preprocessedSource then
+		return include(name)
+	end
 	local func = CompileString(preprocessedSource, luaname)
-
 	local ok, err = pcall(func)
 	if not ok then -- an error occured while executing
-		if not err:find( "EXTENSION_DISABLED" ) then
+		if not err:find("EXTENSION_DISABLED") then
 			error(err, 0)
 		end
 		return
@@ -109,19 +103,16 @@ local function e2_include_finalize()
 	for _, info in ipairs(included_files) do
 		local ok, message = pcall(e2_include_pass2, unpack(info))
 		if not ok then
-			WireLib.ErrorNoHalt(string.format("There was an error loading " ..
-			"the %s extension. Please report this to its developer.\n%s\n",
-			info[1], message))
+			WireLib.ErrorNoHalt(string.format("There was an error loading " .. "the %s extension. Please report this to its developer.\n%s\n", info[1], message))
 		end
 	end
+
 	included_files = nil
 	e2_include = nil
 end
 
 -- end preprocessor stuff
-
 e2_include_init()
-
 e2_include("core.lua")
 e2_include("array.lua")
 e2_include("number.lua")
@@ -169,7 +160,6 @@ e2_include("easings.lua")
 e2_include("damage.lua")
 e2_include("remote.lua")
 e2_include("egpobjects.lua")
-
 -- Load serverside files here, they need additional parsing
 do
 	local list = file.Find("entities/gmod_wire_expression2/core/custom/*.lua", "LUA")

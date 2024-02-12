@@ -1,31 +1,29 @@
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_wire_entity" )
-ENT.PrintName		= "Wire Gimbal"
-ENT.WireDebugName 	= "Gimbal"
-
-if CLIENT then return end -- No more client
-
-function ENT:Initialize()
-	self:PhysicsInit( SOLID_VPHYSICS )
-	self:SetMoveType( MOVETYPE_VPHYSICS )
-	self:SetSolid( SOLID_VPHYSICS )
-	self:GetPhysicsObject():EnableGravity(false)
-
-	self.Inputs = WireLib.CreateInputs(self,{"On", "X", "Y", "Z", "Target [VECTOR]", "Direction [VECTOR]", "Angle [ANGLE]", "AngleOffset [ANGLE]"})
-
-	self.XYZ = Vector()
-	self.TargetAngOffset = Matrix()
-	self.TargetAngOffset:SetAngles(Angle(90,0,0))
+DEFINE_BASECLASS("base_wire_entity")
+ENT.PrintName = "Wire Gimbal"
+ENT.WireDebugName = "Gimbal"
+if CLIENT then -- No more client
+	return
 end
 
-function ENT:TriggerInput(name,value)
+function ENT:Initialize()
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:SetSolid(SOLID_VPHYSICS)
+	self:GetPhysicsObject():EnableGravity(false)
+	self.Inputs = WireLib.CreateInputs(self, { "On", "X", "Y", "Z", "Target [VECTOR]", "Direction [VECTOR]", "Angle [ANGLE]", "AngleOffset [ANGLE]" })
+	self.XYZ = Vector()
+	self.TargetAngOffset = Matrix()
+	self.TargetAngOffset:SetAngles(Angle(90, 0, 0))
+end
+
+function ENT:TriggerInput(name, value)
 	if name == "On" then
 		self.On = value ~= 0
 	else
 		self.TargetPos = nil
 		self.TargetDir = nil
 		self.TargetAng = nil
-
 		if name == "X" then
 			self.XYZ.x = value
 			self.TargetPos = self.XYZ
@@ -47,10 +45,10 @@ function ENT:TriggerInput(name,value)
 			self.TargetAngOffset:SetAngles(value)
 		end
 	end
+
 	self:ShowOutput()
 	return true
 end
-
 
 function ENT:Think()
 	if self.On then
@@ -62,15 +60,18 @@ function ENT:Think()
 		elseif self.TargetAng then
 			ang = self.TargetAng
 		end
+
 		if ang then
 			local m = Matrix()
 			m:SetAngles(ang)
 			m = m * self.TargetAngOffset
 			self:SetAngles(m:GetAngles())
 		end
+
 		-- TODO: Put an option in the CPanel for Angle(90,0,0), and other useful directions
 		self:GetPhysicsObject():Wake()
 	end
+
 	self:NextThink(CurTime())
 	return true
 end

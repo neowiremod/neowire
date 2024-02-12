@@ -1,17 +1,21 @@
-WireToolSetup.setCategory( "Physics/Constraints" )
-WireToolSetup.open( "nailer", "Nailer", "gmod_wire_nailer", nil, "Nailers" )
-
-if ( CLIENT ) then
-	language.Add( "Tool.wire_nailer.name", "Nailer Tool (Wire)" )
-	language.Add( "Tool.wire_nailer.desc", "Spawns a constant nailer prop for use with the wire system." )
-	TOOL.Information = { { name = "left", text = "Create/Update " .. TOOL.Name } }
+WireToolSetup.setCategory("Physics/Constraints")
+WireToolSetup.open("nailer", "Nailer", "gmod_wire_nailer", nil, "Nailers")
+if CLIENT then
+	language.Add("Tool.wire_nailer.name", "Nailer Tool (Wire)")
+	language.Add("Tool.wire_nailer.desc", "Spawns a constant nailer prop for use with the wire system.")
+	TOOL.Information = {
+		{
+			name = "left",
+			text = "Create/Update " .. TOOL.Name,
+		},
+	}
 end
-WireToolSetup.BaseLang()
-WireToolSetup.SetupMax( 20 )
 
-if (SERVER) then
+WireToolSetup.BaseLang()
+WireToolSetup.SetupMax(20)
+if SERVER then
 	function TOOL:GetConVars()
-		return self:GetClientNumber( "forcelim" ), self:GetClientNumber( "range" ), self:GetClientNumber( "beam" )==1
+		return self:GetClientNumber("forcelim"), self:GetClientNumber("range"), self:GetClientNumber("beam") == 1
 	end
 end
 
