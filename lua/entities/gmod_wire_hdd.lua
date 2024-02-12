@@ -17,8 +17,8 @@ function ENT:Initialize()
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
 
-	self.Outputs = Wire_CreateOutputs(self, { "Data", "Capacity", "DriveID" })
-	self.Inputs = Wire_CreateInputs(self, { "Clk", "AddrRead", "AddrWrite", "Data" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Data", "Capacity", "DriveID" })
+	self.Inputs = WireLib.CreateInputs(self, { "Clk", "AddrRead", "AddrWrite", "Data" })
 
 	self.Clk = 0
 	self.AWrite = 0
@@ -54,7 +54,7 @@ function ENT:Setup(DriveID, DriveCap)
 	self.DriveCap = DriveCap
 	self:UpdateCap()
 	self:SetOverlayText(self.DriveCap.."kb".."\nWriteAddr:"..self.AWrite.."  Data:"..self.Data.."  Clock:"..self.Clk.."\nReadAddr:"..self.ARead.." = ".. self.Out)
-	Wire_TriggerOutput(self, "DriveID", self.DriveID)
+	WireLib.TriggerOutput(self, "DriveID", self.DriveID)
 end
 
 function ENT:GetStructName(name)
@@ -95,7 +95,7 @@ function ENT:GetCap()
 		self.DriveCap = 256
 	end
 
-	Wire_TriggerOutput(self, "Capacity", self.DriveCap)
+	WireLib.TriggerOutput(self, "Capacity", self.DriveCap)
 end
 
 function ENT:UpdateCap()
@@ -291,7 +291,7 @@ function ENT:TriggerInput(iname, value)
 			if (self.ARead == self.AWrite) then
 				local val = self:ReadCell(self.ARead)
 				if (val) then
-					Wire_TriggerOutput(self, "Data", val)
+					WireLib.TriggerOutput(self, "Data", val)
 					self.Out = val
 				end
 			end
@@ -300,7 +300,7 @@ function ENT:TriggerInput(iname, value)
 		self.ARead = value
 		local val = self:ReadCell(value)
 		if (val) then
-			Wire_TriggerOutput(self, "Data", val)
+			WireLib.TriggerOutput(self, "Data", val)
 			self.Out = val
 		end
 	elseif (iname == "AddrWrite") then
@@ -315,7 +315,7 @@ function ENT:TriggerInput(iname, value)
 			if (self.ARead == self.AWrite) then
 				local val = self:ReadCell(self.ARead)
 				if (val) then
-					Wire_TriggerOutput(self, "Data", val)
+					WireLib.TriggerOutput(self, "Data", val)
 					self.Out = val
 				end
 			end

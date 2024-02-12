@@ -14,7 +14,7 @@ function ENT:Initialize()
 
 	self:SetOn( false )
 
-	self.Inputs = Wire_CreateInputs(self, { "A" })
+	self.Inputs = WireLib.CreateInputs(self, { "A" })
 end
 
 function ENT:TriggerInput(iname, value)

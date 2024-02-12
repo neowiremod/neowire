@@ -31,7 +31,7 @@ function ENT:Setup( action, noclip )
 	if gate.outputs then
 		WireLib.AdjustSpecialOutputs(self, gate.outputs, gate.outputtypes)
 	else
-		--Wire_AdjustOutputs(self, { "Out" })
+		--WireLib.AdjustOutputs(self, { "Out" })
 		WireLib.AdjustSpecialOutputs(self, { "Out" }, gate.outputtypes)
 	end
 
@@ -113,12 +113,12 @@ function ENT:CalcOutput(iter)
 			local result = { self.Action.output(self, unpack(self:GetActionInputs(), 1, #self.Action.inputs)) }
 
 			for k,v in ipairs(self.Action.outputs) do
-				Wire_TriggerOutput(self, v, result[k] or WireLib.GetDefaultForType(self.Outputs[v].Type), iter)
+				WireLib.TriggerOutput(self, v, result[k] or WireLib.GetDefaultForType(self.Outputs[v].Type), iter)
 			end
 		else
 			local value = self.Action.output(self, unpack(self:GetActionInputs(), 1, #self.Action.inputs)) or WireLib.GetDefaultForType(self.Outputs.Out.Type)
 
-			Wire_TriggerOutput(self, "Out", value, iter)
+			WireLib.TriggerOutput(self, "Out", value, iter)
 		end
 	end
 end

@@ -11,8 +11,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs( self, { "Friction" } )
-	--self.Outputs = Wire_CreateOutputs( self, { "Welded" } )
+	self.Inputs = WireLib.CreateInputs( self, { "Friction" } )
+	--self.Outputs = WireLib.CreateOutputs( self, { "Welded" } )
 
 	self.clutch_friction = 0
 	self.clutch_ballsockets = {}	-- Table of constraints as keys

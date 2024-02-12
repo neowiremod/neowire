@@ -189,9 +189,9 @@ function ENT:TriggerWireOutput(ent, i, val)
 	if (not Convert) then return false end
 
 	if (Toggle) then
-		Wire_TriggerOutput(ent, OutputName, Convert(self, ent, i))
+		WireLib.TriggerOutput(ent, OutputName, Convert(self, ent, i))
 	else
-		Wire_TriggerOutput(ent, OutputName, Convert(val))
+		WireLib.TriggerOutput(ent, OutputName, Convert(val))
 	end
 	return true
 end

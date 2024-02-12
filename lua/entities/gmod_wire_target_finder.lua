@@ -10,7 +10,7 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs(self, { "Hold", "Ignore [ARRAY]" })
+	self.Inputs = WireLib.CreateInputs(self, { "Hold", "Ignore [ARRAY]" })
 	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Out" }, { "ENTITY" } )
 end
 
@@ -119,7 +119,7 @@ function ENT:Setup(maxrange, players, npcs, npcname, beacons, hoverballs, thrust
 	table.insert(AdjInputs, "Hold")
 	table.insert(AdjInputs, "Ignore [ARRAY]")
 
-	Wire_AdjustInputs(self, AdjInputs)
+	WireLib.AdjustInputs(self, AdjInputs)
 
 	self:ShowOutput(false)
 end
@@ -149,7 +149,7 @@ function ENT:GetBeaconPos(sensor)
 	if self.SelectedTargets[ch] then
 		if not self.SelectedTargets[ch]:IsValid() then
 			self.SelectedTargets[ch] = nil
-			Wire_TriggerOutput(self, tostring(ch), 0)
+			WireLib.TriggerOutput(self, tostring(ch), 0)
 			return sensor:GetPos()
 		end
 
@@ -168,7 +168,7 @@ function ENT:GetBeaconVelocity(sensor)
 	if selected then
 		if not selected:IsValid() then
 			self.SelectedTargets[ch] = nil
-			Wire_TriggerOutput(self, tostring(ch), 0)
+			WireLib.TriggerOutput(self, tostring(ch), 0)
 			return sensor:GetVelocity()
 		end
 		return selected:GetVelocity()
@@ -201,8 +201,8 @@ function ENT:SelectorNext(ch)
 
 		self.SelectedTargetsSel[ch] = sel + 1
 		self.Inputs[ch .. "-HoldTarget"].Value = 1 --put the channel on hold so it wont change in the next scan
-		Wire_TriggerOutput(self, tostring(ch), 1)
-		Wire_TriggerOutput(self, tostring(ch) .. "_Ent", self.SelectedTargets[ch])
+		WireLib.TriggerOutput(self, tostring(ch), 1)
+		WireLib.TriggerOutput(self, tostring(ch) .. "_Ent", self.SelectedTargets[ch])
 	end
 end
 
@@ -332,12 +332,12 @@ function ENT:Think()
 				if (#self.Bogeys > 0) then
 					self.SelectedTargets[i] = table.remove(self.Bogeys, 1)
 					if (self.PaintTarget) then self:TargetPainter(self.SelectedTargets[i], true) end
-					Wire_TriggerOutput(self, tostring(i), 1)
-					Wire_TriggerOutput(self, tostring(i) .. "_Ent", self.SelectedTargets[i])
+					WireLib.TriggerOutput(self, tostring(i), 1)
+					WireLib.TriggerOutput(self, tostring(i) .. "_Ent", self.SelectedTargets[i])
 				else
 					self.SelectedTargets[i] = nil
-					Wire_TriggerOutput(self, tostring(i), 0)
-					Wire_TriggerOutput(self, tostring(i) .. "_Ent", NULL)
+					WireLib.TriggerOutput(self, tostring(i), 0)
+					WireLib.TriggerOutput(self, tostring(i) .. "_Ent", NULL)
 				end
 			end
 		end

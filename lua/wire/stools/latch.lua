@@ -54,7 +54,7 @@ function TOOL:LeftClick( trace )
 
 		// Initialize controller inputs/outputs
 		controller:TriggerInput( "Activate", 1 )
-		Wire_TriggerOutput( controller, "Welded", 1 )
+		WireLib.TriggerOutput( controller, "Welded", 1 )
 
 		self.Constraint = nil
 		self:ClearObjects()

@@ -14,8 +14,8 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self, {"Write","Read","Value","Range"})
-	self.Outputs = Wire_CreateOutputs(self, {"Data","Sector","LocalSector","Track","Stack","Address"})
+	self.Inputs = WireLib.CreateInputs(self, {"Write","Read","Value","Range"})
+	self.Outputs = WireLib.CreateOutputs(self, {"Data","Sector","LocalSector","Track","Stack","Address"})
 
 	self.Command = {}
 	self.Command[0]  = 0 //[W] Write ray on
@@ -258,15 +258,15 @@ function ENT:Think()
 
 	//Update output
 	if (self.WriteBuffer[0]) then
-		Wire_TriggerOutput(self, "Data",self.WriteBuffer[0])
+		WireLib.TriggerOutput(self, "Data",self.WriteBuffer[0])
 	else
-		Wire_TriggerOutput(self, "Data",0)
+		WireLib.TriggerOutput(self, "Data",0)
 	end
-	Wire_TriggerOutput(self, "Sector", 	self.Command[2])
-	Wire_TriggerOutput(self, "LocalSector",	self.Command[3])
-	Wire_TriggerOutput(self, "Track", 	self.Command[4])
-	Wire_TriggerOutput(self, "Stack", 	self.Command[5])
-	Wire_TriggerOutput(self, "Address", 	self.Command[6])
+	WireLib.TriggerOutput(self, "Sector", 	self.Command[2])
+	WireLib.TriggerOutput(self, "LocalSector",	self.Command[3])
+	WireLib.TriggerOutput(self, "Track", 	self.Command[4])
+	WireLib.TriggerOutput(self, "Stack", 	self.Command[5])
+	WireLib.TriggerOutput(self, "Address", 	self.Command[6])
 
 	self:NextThink(CurTime()+0.01)
 	return true

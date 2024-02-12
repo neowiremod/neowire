@@ -10,8 +10,8 @@ function ENT:Initialize()
   self:SetMoveType( MOVETYPE_VPHYSICS)
   self:SetSolid( SOLID_VPHYSICS)
   self:SetUseType( SIMPLE_USE)
-  self.Outputs = Wire_CreateOutputs(self, {"Memory"})
-  self.Inputs = Wire_CreateInputs(self,{"Memory1","Memory2","Memory3","Memory4","Memory5","Memory6","Memory7","Memory8"})
+  self.Outputs = WireLib.CreateOutputs(self, {"Memory"})
+  self.Inputs = WireLib.CreateInputs(self,{"Memory1","Memory2","Memory3","Memory4","Memory5","Memory6","Memory7","Memory8"})
 
   self.DataRate = 0
   self.DataBytes = 0
@@ -36,7 +36,7 @@ function ENT:Think()
   self.DataRate = self.DataBytes
   self.DataBytes = 0
 
-  Wire_TriggerOutput(self, "Memory", self.DataRate)
+  WireLib.TriggerOutput(self, "Memory", self.DataRate)
   self:SetOverlayText("Data rate: "..math.floor(self.DataRate*2).." bps")
   self:NextThink(CurTime()+0.5)
 end

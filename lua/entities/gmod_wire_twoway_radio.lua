@@ -10,8 +10,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs(self, { "A", "B", "C", "D" })
-	self.Outputs = Wire_CreateOutputs(self, { "A", "B", "C", "D" })
+	self.Inputs = WireLib.CreateInputs(self, { "A", "B", "C", "D" })
+	self.Outputs = WireLib.CreateOutputs(self, { "A", "B", "C", "D" })
 
 	self.PairID = nil
 	self.Other = nil
@@ -24,10 +24,10 @@ function ENT:Setup()
 	self.PrevOutputD = nil
 
 	self:ShowOutput("update", 1)
-	Wire_TriggerOutput(self, "A", self.Outputs.A.Value or 0)
-	Wire_TriggerOutput(self, "B", self.Outputs.B.Value or 0)
-	Wire_TriggerOutput(self, "C", self.Outputs.C.Value or 0)
-	Wire_TriggerOutput(self, "D", self.Outputs.D.Value or 0)
+	WireLib.TriggerOutput(self, "A", self.Outputs.A.Value or 0)
+	WireLib.TriggerOutput(self, "B", self.Outputs.B.Value or 0)
+	WireLib.TriggerOutput(self, "C", self.Outputs.C.Value or 0)
+	WireLib.TriggerOutput(self, "D", self.Outputs.D.Value or 0)
 end
 
 local radio_twowaycounter = 0
@@ -57,13 +57,13 @@ function IsRadio(entity)
 end
 function ENT:ReceiveRadio(iname, value)
 	if (iname == "A") and (self.Other) and (self.Other:IsValid()) then
-		Wire_TriggerOutput(self, "A", value)
+		WireLib.TriggerOutput(self, "A", value)
 	elseif (iname == "B") and (self.Other) and (self.Other:IsValid()) then
-		Wire_TriggerOutput(self, "B", value)
+		WireLib.TriggerOutput(self, "B", value)
 	elseif (iname == "C") and (self.Other) and (self.Other:IsValid()) then
-		Wire_TriggerOutput(self, "C", value)
+		WireLib.TriggerOutput(self, "C", value)
 	elseif (iname == "D") and (self.Other) and (self.Other:IsValid()) then
-		Wire_TriggerOutput(self, "D", value)
+		WireLib.TriggerOutput(self, "D", value)
 	end
 	self:ShowOutput(iname, value)
 end
@@ -146,8 +146,8 @@ end
 function ENT:OnRestore()
 	BaseClass.OnRestore(self)
 
-	Wire_AdjustInputs(self, { "A", "B", "C", "D" })
-	Wire_AdjustOutputs(self, { "A", "B", "C", "D" })
+	WireLib.AdjustInputs(self, { "A", "B", "C", "D" })
+	WireLib.AdjustOutputs(self, { "A", "B", "C", "D" })
 end
 
 // Dupe info functions added by TheApathetic

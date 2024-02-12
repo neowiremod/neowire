@@ -25,9 +25,9 @@ function SWEP:PrimaryAttack()
 	self.Pointing = not self.Pointing
 	self.Weapon:SetNWBool("Active", self.Pointing)
 	if self.Pointing and IsValid(self.Receiver) then
-		Wire_TriggerOutput(self.Receiver,"Active",1)
+		WireLib.TriggerOutput(self.Receiver,"Active",1)
 	else
-		Wire_TriggerOutput(self.Receiver,"Active",0)
+		WireLib.TriggerOutput(self.Receiver,"Active",0)
 	end
 end
 
@@ -53,11 +53,11 @@ function SWEP:Think()
 		end
 		local point = trace.HitPos
 		if (COLOSSAL_SANDBOX) then point = point * 6.25 end
-		Wire_TriggerOutput(self.Receiver, "X", point.x)
-		Wire_TriggerOutput(self.Receiver, "Y", point.y)
-		Wire_TriggerOutput(self.Receiver, "Z", point.z)
-		Wire_TriggerOutput(self.Receiver, "Pos", point)
-		Wire_TriggerOutput(self.Receiver, "RangerData", trace)
+		WireLib.TriggerOutput(self.Receiver, "X", point.x)
+		WireLib.TriggerOutput(self.Receiver, "Y", point.y)
+		WireLib.TriggerOutput(self.Receiver, "Z", point.z)
+		WireLib.TriggerOutput(self.Receiver, "Pos", point)
+		WireLib.TriggerOutput(self.Receiver, "RangerData", trace)
 		self.Receiver.VPos = point
 	end
 end

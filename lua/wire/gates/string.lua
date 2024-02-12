@@ -336,7 +336,7 @@ GateActions["string_to_memory"] = {
         gate.stringQueued = true
       end
     end
-    return gate.Outputs["Memory"].Value --This will prevent Wire_TriggerOutput from changing anything
+    return gate.Outputs["Memory"].Value --This will prevent WireLib.TriggerOutput from changing anything
   end,
 
   ReadCell = function(self, gate, Address)

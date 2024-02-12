@@ -10,7 +10,7 @@ end
 
 function ENT:Initialize()
 	BaseClass.Initialize(self)
-	self.Inputs = Wire_CreateInputs( self, { "Mul" } )
+	self.Inputs = WireLib.CreateInputs( self, { "Mul" } )
 end
 
 function ENT:SetConstraint( c )

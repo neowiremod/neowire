@@ -192,11 +192,11 @@ net.Receive("wire_keypad", function(netlen, ply)
 		local access = (ent.Password == util.CRC(ent.CurrentNum))
 		if access then
 			ent:SetNWString("keypad_display", "y")
-			Wire_TriggerOutput(ent, "Valid", 1)
+			WireLib.TriggerOutput(ent, "Valid", 1)
 			ent:EmitSound("buttons/button9.wav")
 		else
 			ent:SetNWString("keypad_display", "n")
-			Wire_TriggerOutput(ent, "Invalid", 1)
+			WireLib.TriggerOutput(ent, "Invalid", 1)
 			ent:EmitSound("buttons/button8.wav")
 		end
 
@@ -206,9 +206,9 @@ net.Receive("wire_keypad", function(netlen, ply)
 				ent:SetNWString("keypad_display", "")
 				ent.CurrentNum = 0
 				if access then
-					Wire_TriggerOutput(ent, "Valid", 0)
+					WireLib.TriggerOutput(ent, "Valid", 0)
 				else
-					Wire_TriggerOutput(ent, "Invalid", 0)
+					WireLib.TriggerOutput(ent, "Invalid", 0)
 				end
 			end
 		end)

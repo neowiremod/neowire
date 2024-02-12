@@ -15,8 +15,8 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Inputs = Wire_CreateInputs(self, keynames)
-	self.Outputs = Wire_CreateOutputs(self, keynames)
+	self.Inputs = WireLib.CreateInputs(self, keynames)
+	self.Outputs = WireLib.CreateOutputs(self, keynames)
 
 	self.Buffer = {}
 	for i = 1, #keynames do
@@ -88,7 +88,7 @@ function ENT:Switch( on, key )
 	self:ShowOutput()
 	self.Value = on and self.value_on or self.value_off
 
-	Wire_TriggerOutput(self, keynames[key], self.Value)
+	WireLib.TriggerOutput(self, keynames[key], self.Value)
 
 	return true
 end

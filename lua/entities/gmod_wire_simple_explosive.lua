@@ -21,7 +21,7 @@ function ENT:Initialize()
 	self.NormInfo = ""
 	self.DisabledByTimeUntil = CurTime()
 
-	self.Inputs = Wire_CreateInputs(self, { "Detonate" })
+	self.Inputs = WireLib.CreateInputs(self, { "Detonate" })
 end
 
 function ENT:Setup( key, damage, removeafter, radius )

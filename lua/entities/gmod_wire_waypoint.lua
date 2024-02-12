@@ -31,10 +31,10 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Outputs = Wire_CreateOutputs(self, { "Waypoints [ARRAY]" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Waypoints [ARRAY]" })
 
 	self.waypoints = { self }
-	Wire_TriggerOutput(self, "Waypoints", self.waypoints)
+	WireLib.TriggerOutput(self, "Waypoints", self.waypoints)
 end
 
 function ENT:Setup(range)
@@ -77,7 +77,7 @@ function ENT:SetNextWaypoint(wp)
 	table.Add(self.waypoints, wp.waypoints)
 	for _,ent in ipairs(self.waypoints) do
 		ent.waypoints = self.waypoints
-		Wire_TriggerOutput(ent, "Waypoints", ent.waypoints)
+		WireLib.TriggerOutput(ent, "Waypoints", ent.waypoints)
 	end
 end
 

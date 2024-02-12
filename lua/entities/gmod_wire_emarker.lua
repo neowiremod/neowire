@@ -20,13 +20,13 @@ function ENT:LinkEMarker(mark)
 	self.mark:CallOnRemove("EMarker.UnLink", function(ent)
 		if IsValid(self) and self.mark == ent then self:UnLinkEMarker() end
 	end)
-	Wire_TriggerOutput(self, "Entity", self.mark)
+	WireLib.TriggerOutput(self, "Entity", self.mark)
 	self:SetOverlayText( "Linked - " .. self.mark:GetModel() )
 end
 
 function ENT:UnLinkEMarker()
 	self.mark = NULL
-	Wire_TriggerOutput(self, "Entity", NULL)
+	WireLib.TriggerOutput(self, "Entity", NULL)
 	self:SetOverlayText( "No Mark selected" )
 end
 

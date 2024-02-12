@@ -52,7 +52,7 @@ function ENT:Initialize()
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
 
-	self.Outputs = Wire_CreateOutputs(self, { "Out", "MPH", "KPH" })
+	self.Outputs = WireLib.CreateOutputs(self, { "Out", "MPH", "KPH" })
 end
 
 function ENT:Setup( xyz_mode, AngVel )
@@ -70,7 +70,7 @@ function ENT:Setup( xyz_mode, AngVel )
 	if (AngVel) then
 		table.Add(outs, {"AngVel_P", "AngVel_Y", "AngVel_R" } )
 	end
-	Wire_AdjustOutputs(self, outs)
+	WireLib.AdjustOutputs(self, outs)
 end
 
 function ENT:Think()
@@ -79,22 +79,22 @@ function ENT:Think()
 	if (self.XYZMode) then
 		local vel = self:WorldToLocal(self:GetVelocity()+self:GetPos())
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
-		Wire_TriggerOutput(self, "X", -vel.y)
-		Wire_TriggerOutput(self, "Y", vel.x)
-		Wire_TriggerOutput(self, "Z", vel.z)
+		WireLib.TriggerOutput(self, "X", -vel.y)
+		WireLib.TriggerOutput(self, "Y", vel.x)
+		WireLib.TriggerOutput(self, "Z", vel.z)
 	else
 		local vel = self:GetVelocity():Length()
 		if (COLOSSAL_SANDBOX) then vel = vel * 6.25 end
-		Wire_TriggerOutput(self, "Out", vel) // vel = Source Units / sec, Source Units = Inch * 0.75 , more info here: http://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
-		Wire_TriggerOutput(self, "MPH", vel * 3600 / 63360 * 0.75)
-		Wire_TriggerOutput(self, "KPH", vel * 3600 * 0.0000254 * 0.75)
+		WireLib.TriggerOutput(self, "Out", vel) // vel = Source Units / sec, Source Units = Inch * 0.75 , more info here: http://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
+		WireLib.TriggerOutput(self, "MPH", vel * 3600 / 63360 * 0.75)
+		WireLib.TriggerOutput(self, "KPH", vel * 3600 * 0.0000254 * 0.75)
 	end
 
 	if (self.AngVel) then
 		local ang = self:GetPhysicsObject():GetAngleVelocity()
-		Wire_TriggerOutput(self, "AngVel_P", ang.y)
-		Wire_TriggerOutput(self, "AngVel_Y", ang.z)
-		Wire_TriggerOutput(self, "AngVel_R", ang.x)
+		WireLib.TriggerOutput(self, "AngVel_P", ang.y)
+		WireLib.TriggerOutput(self, "AngVel_Y", ang.z)
+		WireLib.TriggerOutput(self, "AngVel_R", ang.x)
 	end
 
 	self:NextThink(CurTime()+0.04)

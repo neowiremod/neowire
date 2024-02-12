@@ -86,12 +86,12 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Outputs = Wire_CreateOutputs(self, { "X", "Y", "Use (Outputs 1 as long as any player is holding the use key while aiming at the screen.)", "OnScreen (Outputs 1 as long as any player is aiming at the screen)" })
+	self.Outputs = WireLib.CreateOutputs(self, { "X", "Y", "Use (Outputs 1 as long as any player is holding the use key while aiming at the screen.)", "OnScreen (Outputs 1 as long as any player is aiming at the screen)" })
 
-	Wire_TriggerOutput(self, "X", 0)
-	Wire_TriggerOutput(self, "Y", 0)
-	Wire_TriggerOutput(self, "Use", 0)
-	Wire_TriggerOutput(self, "OnScreen", 0)
+	WireLib.TriggerOutput(self, "X", 0)
+	WireLib.TriggerOutput(self, "Y", 0)
+	WireLib.TriggerOutput(self, "Use", 0)
+	WireLib.TriggerOutput(self, "OnScreen", 0)
 
 	self.lastOnscreen = 0
 	self.lastX = 0
@@ -139,8 +139,8 @@ function ENT:Think()
 							cx = cx * 2 - 1
 							cy = -(cy * 2 - 1)
 						end
-						Wire_TriggerOutput(self, "X", cx)
-						Wire_TriggerOutput(self, "Y", cy)
+						WireLib.TriggerOutput(self, "X", cx)
+						WireLib.TriggerOutput(self, "Y", cy)
 						self:ShowOutput(cx, cy, clickActive, 1)
 					end
 				end
@@ -149,13 +149,13 @@ function ENT:Think()
 	end
 
 	if (onScreen ~= self.lastOnScreen) then
-		Wire_TriggerOutput(self, "OnScreen", onScreen)
+		WireLib.TriggerOutput(self, "OnScreen", onScreen)
 		self:ShowOutput(self.lastX, self.lastY, self.lastClick, onScreen)
 		self.lastOnScreen = onScreen
 	end
 
 	if (clickActive ~= self.lastClick) then
-		Wire_TriggerOutput(self, "Use", clickActive)
+		WireLib.TriggerOutput(self, "Use", clickActive)
 		self:ShowOutput(self.lastX, self.lastY, clickActive, self.lastOnScreen)
 		self.lastClick = clickActive
 	end
@@ -170,7 +170,7 @@ end
 
 function ENT:OnRestore()
 	BaseClass.OnRestore(self)
-	Wire_AdjustOutputs(self, { "X", "Y", "Use", "OnScreen" })
+	WireLib.AdjustOutputs(self, { "X", "Y", "Use", "OnScreen" })
 end
 
 -- only needed for legacy dupes

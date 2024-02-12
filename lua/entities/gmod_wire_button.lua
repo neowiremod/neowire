@@ -132,18 +132,18 @@ function ENT:Setup(toggle, value_off, value_on, description, entityout)
 			"EntID (The entity ID of the player who pressed the button) [NORMAL]" ,
 			"Entity (The player who pressed the button) [ENTITY]"
 		})
-		Wire_TriggerOutput(self, "EntID", 0)
-		Wire_TriggerOutput(self, "Entity", nil)
+		WireLib.TriggerOutput(self, "EntID", 0)
+		WireLib.TriggerOutput(self, "Entity", nil)
 		self.OutputEntID=true
 	else
-		Wire_AdjustOutputs(self, { "Out" })
+		WireLib.AdjustOutputs(self, { "Out" })
 		self.OutputEntID=false
 	end
 
 	if toggle then
-		Wire_AdjustInputs(self, { "Set" })
+		WireLib.AdjustInputs(self, { "Set" })
 	else
-		Wire_AdjustInputs(self, {})
+		WireLib.AdjustInputs(self, {})
 	end
 	self:Switch(self:GetOn())
 end
@@ -169,10 +169,10 @@ function ENT:Switch(on)
 		if self.OutputEntID then self.EntToOutput = NULL end
 	end
 
-	Wire_TriggerOutput(self, "Out", self.Value)
+	WireLib.TriggerOutput(self, "Out", self.Value)
 	if self.OutputEntID then
-		Wire_TriggerOutput(self, "EntID", self.EntToOutput:EntIndex())
-		Wire_TriggerOutput(self, "Entity", self.EntToOutput)
+		WireLib.TriggerOutput(self, "EntID", self.EntToOutput:EntIndex())
+		WireLib.TriggerOutput(self, "Entity", self.EntToOutput)
 	end
 	return true
 end

@@ -7,7 +7,7 @@
 local function RemoveWire(Entity, SendToCL)
 	if (not IsValid(Entity)) then return end
 
-	Wire_Remove(Entity, not SendToCL)
+	WireLib.Remove(Entity, not SendToCL)
 
 	local self = Entity._WireMapInterfaceEnt
 	if (IsValid(self)) then

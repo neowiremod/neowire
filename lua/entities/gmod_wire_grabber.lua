@@ -14,8 +14,8 @@ function ENT:Initialize()
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = Wire_CreateInputs(self, { "Grab","Strength (The strength of the weld. The weld will break if enough force is applied. Setting to zero makes the weld unbreakable.)","Range" })
-	self.Outputs = Wire_CreateOutputs(self, {"Holding", "Grabbed Entity [ENTITY]"})
+	self.Inputs = WireLib.CreateInputs(self, { "Grab","Strength (The strength of the weld. The weld will break if enough force is applied. Setting to zero makes the weld unbreakable.)","Range" })
+	self.Outputs = WireLib.CreateOutputs(self, {"Holding", "Grabbed Entity [ENTITY]"})
 	self.WeldStrength = 0
 	self.Weld = nil
 	self.WeldEntity = nil
@@ -31,7 +31,7 @@ function ENT:OnRemove()
 	if self.Weld then
 		self:ResetGrab()
 	end
-	Wire_Remove(self)
+	WireLib.Remove(self)
 end
 
 function ENT:Setup(Range, Gravity)
@@ -71,8 +71,8 @@ function ENT:ResetGrab()
 	self.ExtraPropWeld = nil
 
 	self:SetColor(Color(255, 255, 255, self:GetColor().a))
-	Wire_TriggerOutput(self, "Holding", 0)
-	Wire_TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
+	WireLib.TriggerOutput(self, "Holding", 0)
+	WireLib.TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
 end
 
 function ENT:CanGrab(trace)
@@ -130,8 +130,8 @@ function ENT:TriggerInput(iname, value)
 			self.EntHadGravity = trace.Entity:GetPhysicsObject():IsGravityEnabled()
 
 			self:SetColor(Color(255, 0, 0, self:GetColor().a))
-			Wire_TriggerOutput(self, "Holding", 1)
-			Wire_TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
+			WireLib.TriggerOutput(self, "Holding", 1)
+			WireLib.TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
 		elseif value == 0 then
 			if self.Weld ~= nil or self.ExtraPropWeld ~= nil then
 				self:ResetGrab()
@@ -183,8 +183,8 @@ function ENT:ApplyDupeInfo(ply, ent, info, GetEntByID)
 		end
 		if self.Weld then
 			self:SetColor(Color(255, 0, 0, self:GetColor().a))
-			Wire_TriggerOutput(self, "Holding", 1)
-			Wire_TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
+			WireLib.TriggerOutput(self, "Holding", 1)
+			WireLib.TriggerOutput(self, "Grabbed Entity", self.WeldEntity)
 		else
 			self:ResetGrab()
 		end

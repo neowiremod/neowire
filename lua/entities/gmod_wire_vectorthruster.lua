@@ -126,7 +126,7 @@ function ENT:Initialize()
 
 	self:StartMotionController()
 
-	self.Inputs = Wire_CreateInputs(self, { "Mul" })
+	self.Inputs = WireLib.CreateInputs(self, { "Mul" })
 
 	self.soundname = Sound( "PhysicsCannister.ThrusterLoop" )
 end
