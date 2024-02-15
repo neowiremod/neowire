@@ -1,41 +1,52 @@
 --[[
 	Array gates
 ]]
-
 GateActions("Array")
-
-
 local types_defaults = {
 	NUMBER = 0,
-	ANGLE = Angle(0,0,0),
-	VECTOR = Vector(0,0,0),
+	ANGLE = Angle(0, 0, 0),
+	VECTOR = Vector(0, 0, 0),
 	STRING = "",
 	ENTITY = NULL,
 }
 
 local types_formats = {
-	NUMBER = function(x) return tostring(x) end,
-	ANGLE = function(x) return string.format("(%d,%d,%d)",x.p,x.r,x.y) end,
-	VECTOR = function(x) return string.format("(%d,%d,%d)",x.x,x.y,x.z) end,
-	STRING = function(x) return x end,
-	ENTITY = function(x) return tostring(x) end,
+	NUMBER = function(x)
+		return tostring(x)
+	end,
+	ANGLE = function(x)
+		return string.format("(%d,%d,%d)", x.p, x.r, x.y)
+	end,
+	VECTOR = function(x)
+		return string.format("(%d,%d,%d)", x.x, x.y, x.z)
+	end,
+	STRING = function(x)
+		return x
+	end,
+	ENTITY = function(x)
+		return tostring(x)
+	end,
 }
 
-local types_compare = { -- used for array find gates.
-	ANGLE = function(a,b) return a.p == b.p and
-								 a.y == b.y and
-								 a.r == b.r end,
-	VECTOR = function(a,b) return a.x == b.x and
-								 a.y == b.y and
-								 a.z == b.z end,
+local types_compare = {
+	-- used for array find gates.
+	ANGLE = function(a, b)
+		return a.p == b.p and a.y == b.y and a.r == b.r
+	end,
+	VECTOR = function(a, b)
+		return a.x == b.x and a.y == b.y and a.z == b.z
+	end,
 }
-local normal_compare = function(a,b) return a == b end
 
-for type_name, default in pairs( types_defaults ) do
+local normal_compare = function(a, b)
+	return a == b
+end
+for type_name, default in pairs(types_defaults) do
 	local type_name2 = type_name
-	if type_name2 == "NUMBER" then type_name2 = "NORMAL" end
+	if type_name2 == "NUMBER" then
+		type_name2 = "NORMAL"
+	end
 	local compare = types_compare[type_name] or normal_compare
-
 	GateActions["array_read_" .. type_name] = {
 		name = "Array Read (" .. type_name .. ")",
 		description = "Attempts to get a " .. type_name:lower() .. " from the array at the index.",
@@ -45,17 +56,24 @@ for type_name, default in pairs( types_defaults ) do
 		output = function(gate, r, index)
 			local var = r[math.floor(index)]
 			local tp = type(var)
+			if not var then
+				return default
+			end
+			if tp == "Player" and type_name == "ENTITY" then -- Special case
+				return var
+			end
 
-			if not var then return default end
+			if tp == "NPC" and type_name == "ENTITY" then -- Special case
+				return var
+			end
 
-			if tp == "Player" and type_name == "ENTITY" then return var end -- Special case
-			if tp == "NPC" and type_name == "ENTITY" then return var end -- Special case
-			if string.upper(tp) ~= type_name then return default end
-
+			if string.upper(tp) ~= type_name then
+				return default
+			end
 			return var
 		end,
-		label = function(Out,r,index)
-			return string.format( "%s[%s] = %s", r, index, types_formats[type_name](Out) )
+		label = function(Out, r, index)
+			return string.format("%s[%s] = %s", r, index, types_formats[type_name](Out))
 		end,
 	}
 
@@ -66,21 +84,22 @@ for type_name, default in pairs( types_defaults ) do
 		inputtypes = { "ARRAY", type_name2 },
 		outputtypes = { "NORMAL" },
 		output = function(gate, r, value)
-			for i=1,#r do
-				if i > 10000 then return 0 end -- Stop iterating too much to prevent lag
+			for i = 1, #r do
+				if i > 10000 then -- Stop iterating too much to prevent lag
+					return 0
+				end
 
 				local var = r[i]
-
-				if compare(var,value) then return i end
+				if compare(var, value) then
+					return i
+				end
 			end
-
 			return 0
 		end,
-		label = function(Out,r,index)
-			return string.format( "find(%s,%s) = %d", r, index, Out )
+		label = function(Out, r, index)
+			return string.format("find(%s,%s) = %d", r, index, Out)
 		end,
 	}
-
 	--[[
 		I feel there is no need for these gates at this time.
 		The only time you'll encounter arrays with gates
@@ -117,7 +136,6 @@ GateActions["array_create"] = {
 	end,
 }
 ]]
-
 GateActions["array_gettype"] = {
 	name = "Array Get Type",
 	description = "Gets the type of the element at the index as a string.",
@@ -126,16 +144,24 @@ GateActions["array_gettype"] = {
 	outputtypes = { "STRING" },
 	output = function(gate, r, index)
 		local tp = type(r[math.floor(index)])
+		if tp == "nil" then
+			return "NIL"
+		end
+		if tp == "Player" then -- Special case
+			return "ENTITY"
+		end
 
-		if tp == "nil" then return "NIL" end
-		if tp == "Player" then return "ENTITY" end -- Special case
-		if tp == "NPC" then return "ENTITY" end -- Special case
-		if not types_defaults[string.upper(tp)] then return "TYPE NOT SUPPORTED" end
+		if tp == "NPC" then -- Special case
+			return "ENTITY"
+		end
 
+		if not types_defaults[string.upper(tp)] then
+			return "TYPE NOT SUPPORTED"
+		end
 		return tp
 	end,
-	label = function(Out,r,index)
-		return string.format( "type(%s[%s]) = %s", r, index, Out )
+	label = function(Out, r, index)
+		return string.format("type(%s[%s]) = %s", r, index, Out)
 	end,
 }
 
@@ -147,7 +173,7 @@ GateActions["array_count"] = {
 	output = function(gate, r)
 		return #r
 	end,
-	label = function(Out,r,index)
-		return string.format( "#%s = %s", r, Out )
+	label = function(Out, r, index)
+		return string.format("#%s = %s", r, Out)
 	end,
 }

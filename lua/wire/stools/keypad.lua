@@ -1,16 +1,20 @@
-WireToolSetup.setCategory( "Input, Output" )
-WireToolSetup.open( "keypad", "Keypad", "gmod_wire_keypad", nil, "Keypads" )
-
+WireToolSetup.setCategory("Input, Output")
+WireToolSetup.open("keypad", "Keypad", "gmod_wire_keypad", nil, "Keypads")
 if CLIENT then
-	language.Add( "tool."..TOOL.Mode..".name", TOOL.Name.." Tool (Wire)" )
-	language.Add( "tool."..TOOL.Mode..".desc", "Spawns a "..TOOL.Name )
-	language.Add( "tool."..TOOL.Mode..".password", "Password: " )
-	language.Add( "tool."..TOOL.Mode..".secure", "Display Asterisks: " )
-	TOOL.Information = { { name = "left", text = "Create/Update " .. TOOL.Name } }
+	language.Add("tool." .. TOOL.Mode .. ".name", TOOL.Name .. " Tool (Wire)")
+	language.Add("tool." .. TOOL.Mode .. ".desc", "Spawns a " .. TOOL.Name)
+	language.Add("tool." .. TOOL.Mode .. ".password", "Password: ")
+	language.Add("tool." .. TOOL.Mode .. ".secure", "Display Asterisks: ")
+	TOOL.Information = {
+		{
+			name = "left",
+			text = "Create/Update " .. TOOL.Name,
+		},
+	}
 end
+
 WireToolSetup.BaseLang()
 WireToolSetup.SetupMax(10)
-
 if SERVER then
 	function TOOL:GetConVars()
 		return util.CRC(self:GetClientInfo("password")), self:GetClientNumber("secure") ~= 0
@@ -28,12 +32,19 @@ if SERVER then
 		return true
 	end
 
-	function TOOL:MakeEnt( ply, model, Ang, trace )
-		return self:CheckPassword() and WireLib.MakeWireEnt( ply, {Class = self.WireClass, Pos=trace.HitPos, Angle=Ang, Model=model}, self:GetConVars() )
+	function TOOL:MakeEnt(ply, model, Ang, trace)
+		return self:CheckPassword() and WireLib.MakeWireEnt(ply, {
+			Class = self.WireClass,
+			Pos = trace.HitPos,
+			Angle = Ang,
+			Model = model,
+		}, self:GetConVars())
 	end
 
-	function TOOL:LeftClick_Update( trace )
-		if self:CheckPassword() then trace.Entity:Setup(self:GetConVars()) end
+	function TOOL:LeftClick_Update(trace)
+		if self:CheckPassword() then
+			trace.Entity:Setup(self:GetConVars())
+		end
 	end
 end
 

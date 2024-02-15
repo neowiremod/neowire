@@ -9,14 +9,11 @@
 		* Removed PEG-style grammar.
 		* Condensed from 1.7k LOC -> 1k LOC
 ]]
-
 AddCSLuaFile()
-
 local Trace, Warning, Error = E2Lib.Debug.Trace, E2Lib.Debug.Warning, E2Lib.Debug.Error
 local Tokenizer = E2Lib.Tokenizer
 local Token, TokenVariant = Tokenizer.Token, Tokenizer.Variant
 local Keyword, Grammar, Operator = E2Lib.Keyword, E2Lib.Grammar, E2Lib.Operator
-
 ---@class Parser
 ---@field tokens Token[]
 ---@field ntokens integer
@@ -27,59 +24,59 @@ local Keyword, Grammar, Operator = E2Lib.Keyword, E2Lib.Grammar, E2Lib.Operator
 ---@field include_files string[]
 local Parser = {}
 Parser.__index = Parser
-
 ---@param tokens table?
 function Parser.new(tokens)
-	return setmetatable({ tokens = tokens or {}, ntokens = tokens and #tokens or 0, index = 1, warnings = {}, traces = {} }, Parser)
+	return setmetatable({
+		tokens = tokens or {},
+		ntokens = tokens and #tokens or 0,
+		index = 1,
+		warnings = {},
+		traces = {},
+	}, Parser)
 end
 
 E2Lib.Parser = Parser
-
 ---@class Node<T>: { data: T, variant: NodeVariant, trace: Trace }
 ---@field variant NodeVariant
 ---@field trace Trace
 ---@field data any
 local Node = {}
 Node.__index = Node
-
 Parser.Node = Node
-
 ---@param variant NodeVariant
 ---@param data any
 ---@param trace Trace
 ---@return Node
 function Node.new(variant, data, trace)
-	return setmetatable({ variant = variant, trace = trace, data = data }, Node)
+	return setmetatable({
+		variant = variant,
+		trace = trace,
+		data = data,
+	}, Node)
 end
 
 ---@enum NodeVariant
 local NodeVariant = {
 	Block = 1,
-
 	--- Statements
 	If = 2, -- `if (1) {} elseif (1) {} else {}`
 	While = 3, -- `while (1) {}`, `do {} while(1)`
 	For = 4, -- `for (I = 1, 2, 3) {}`
 	Foreach = 5, -- `foreach(K, V = T) {}`
-
 	Break = 6, -- break
 	Continue = 7, -- `continue`
 	Return = 8, -- `return`
-
 	Increment = 9, -- `++`
 	Decrement = 10, -- `--`
 	CompoundArithmetic = 11, -- `+=`, `-=`, `*=`, `/=`
 	Assignment = 12, -- `X = Y[2, number] = Z[2] = 5` or `local X = 5`
 	Const = 13, -- const X = 5
-
 	Switch = 14, -- `switch (<EXPR>) { case <EXPR>, <STMT>* default, <STMT*> }
 	Function = 15, -- `function test() {}`
 	Include = 16, -- #include "file"
 	Try = 17, -- try {} catch (Err) {}
-
 	--- Compile time constructs
 	Event = 18, -- event tick() {}
-
 	--- Expressions
 	ExprTernary = 19, -- `X ? Y : Z`
 	ExprDefault = 20, -- `X ?: Y`
@@ -91,7 +88,7 @@ local NodeVariant = {
 	ExprArithmetic = 26, -- `+` `-` `*` `/` `^` `%`
 	ExprUnaryOp = 27, -- `-` `+` `!`
 	ExprMethodCall = 28, -- `<EXPR>:call()`
-	ExprIndex = 29,	-- `<EXPR>[<EXPR>, <type>?]`
+	ExprIndex = 29, -- `<EXPR>[<EXPR>, <type>?]`
 	ExprGrouped = 30, -- (<EXPR>)
 	ExprCall = 31, -- `call()`
 	ExprDynCall = 32, -- `Var()`
@@ -105,7 +102,6 @@ local NodeVariant = {
 }
 
 Parser.Variant = NodeVariant
-
 local NodeVariantLookup = {}
 for var, i in pairs(NodeVariant) do
 	NodeVariantLookup[i] = var
@@ -126,7 +122,6 @@ function Node:instr()
 end
 
 Node.__tostring = Node.debug
-
 ---@return boolean ok, Node|Error ast, table<string, boolean> dvars, string[] include_files, Parser self
 function Parser.Execute(tokens)
 	local instance = Parser.new(tokens)
@@ -134,45 +129,63 @@ function Parser.Execute(tokens)
 	return ok, ast, dvars, include_files, instance
 end
 
-function Parser:Eof() return self.index > self.ntokens end
-function Parser:Peek() return self.tokens[self.index + 1] end
-function Parser:At() return self.tokens[self.index] end
-function Parser:Prev() return self.tokens[self.index - 1] end
+function Parser:Eof()
+	return self.index > self.ntokens
+end
 
-function Parser:Consume(variant --[[@param variant TokenVariant]])
+function Parser:Peek()
+	return self.tokens[self.index + 1]
+end
+
+function Parser:At()
+	return self.tokens[self.index]
+end
+
+function Parser:Prev()
+	return self.tokens[self.index - 1]
+end
+
+function Parser:Consume(variant) --[[@param variant TokenVariant]]
 	local token = self.tokens[self.index] --[[self:At() inline]]
-	if not token or token.variant ~= variant then return end
-
+	if not token or token.variant ~= variant then
+		return
+	end
 	self.index = self.index + 1
 	return token
 end
 
-function Parser:ConsumeValue(variant --[[@param variant TokenVariant]], value --[[@param value any]])
+function Parser:ConsumeValue(variant, value) --[[@param variant TokenVariant]] --[[@param value any]]
 	local token = self.tokens[self.index]
-	if token == nil or token.variant ~= variant or token.value ~= value then return end
-
+	if token == nil or token.variant ~= variant or token.value ~= value then
+		return
+	end
 	self.index = self.index + 1
 	return token
 end
 
-function Parser:ConsumeTailing(variant --[[@param variant TokenVariant]], value --[[@param value any]])
+function Parser:ConsumeTailing(variant, value) --[[@param variant TokenVariant]] --[[@param value any]]
 	local token = self.tokens[self.index]
-	if token == nil or token.variant ~= variant or token.whitespaced then return end
-	if value ~= nil and token.value ~= value then return end
-
+	if token == nil or token.variant ~= variant or token.whitespaced then
+		return
+	end
+	if value ~= nil and token.value ~= value then
+		return
+	end
 	self.index = self.index + 1
 	return token
 end
 
 --- SAFETY: This works fine only assuming ConsumeLeading *always* passes a value which is true atm.
-function Parser:ConsumeLeading(variant --[[@param variant TokenVariant]], value --[[@param value any]])
+function Parser:ConsumeLeading(variant, value) --[[@param variant TokenVariant]] --[[@param value any]]
 	local token = self.tokens[self.index + 1] --[[self:Peek() inline]]
-	if token == nil or token.whitespaced then return end
-
+	if token == nil or token.whitespaced then
+		return
+	end
 	local at = self.tokens[self.index]
-	if at.variant ~= variant or at.value ~= value then return end
+	if at.variant ~= variant or at.value ~= value then
+		return
+	end
 	self.index = self.index + 1
-
 	return at
 end
 
@@ -180,14 +193,14 @@ end
 ---@param trace Trace?
 ---@param quick_fix { replace: string, at: Trace }[]?
 function Parser:Error(message, trace, quick_fix)
-	error( Error.new( message, trace or self:Prev().trace, nil, quick_fix ), 2 )
+	error(Error.new(message, trace or self:Prev().trace, nil, quick_fix), 2)
 end
 
 ---@param message string
 ---@param trace Trace?
 ---@param quick_fix { replace: string, at: Trace }[]?
 function Parser:Warning(message, trace, quick_fix)
-	self.warnings[#self.warnings + 1] = Warning.new( message, trace or self:Prev().trace, quick_fix )
+	self.warnings[#self.warnings + 1] = Warning.new(message, trace or self:Prev().trace, quick_fix)
 end
 
 ---@generic T
@@ -196,27 +209,28 @@ end
 ---@param trace Trace?
 ---@return T
 function Parser:Assert(v, message, trace)
-	if not v then error( Error.new( message, trace or self:Prev().trace ), 2 ) end
+	if not v then
+		error(Error.new(message, trace or self:Prev().trace), 2)
+	end
 	return v
 end
 
 ---@return Node ast, table<string, boolean> dvars, string[] include_files
 function Parser:Process(tokens)
 	self.index, self.tokens, self.ntokens, self.warnings, self.delta_vars, self.include_files = 1, tokens, #tokens, {}, {}, {}
-
 	local stmts = {}
-	if self:Eof() then return Node.new(NodeVariant.Block, stmts, Trace.new(0, 0, 0, 0)), self.delta_vars, self.include_files end
-
+	if self:Eof() then
+		return Node.new(NodeVariant.Block, stmts, Trace.new(0, 0, 0, 0)), self.delta_vars, self.include_files
+	end
 	while true do
 		if self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 			self:Error("Statement separator (,) must not appear multiple times")
 		end
-
 		local stmt = self:Stmt() or self:Expr()
 		stmts[#stmts + 1] = stmt
-
-		if self:Eof() then break end
-
+		if self:Eof() then
+			break
+		end
 		if not self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 			self:Assert(self:At().whitespaced, "Statements must be separated by comma (,) or whitespace", stmt.trace)
 		end
@@ -228,28 +242,26 @@ end
 
 ---@return Node
 function Parser:Condition()
-	self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() expected before condition")
-		local expr = self:Expr()
-	self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close condition")
+	self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() expected before condition")
+	local expr = self:Expr()
+	self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close condition")
 	return expr
 end
 
 ---@return Node?
 function Parser:Stmt()
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.If) then
-		local cond, block = self:Condition(), self:Assert( self:Block(), "Expected block after if condition")
-
+		local cond, block = self:Condition(), self:Assert(self:Block(), "Expected block after if condition")
 		---@type { [1]: Node?, [2]: Node }[]
-		local chain = { {cond, block} }
+		local chain = { { cond, block } }
 		while self:ConsumeValue(TokenVariant.Keyword, Keyword.Elseif) do
-			local cond, block = self:Condition(), self:Assert( self:Block(), "Expected block after elseif condition")
+			local cond, block = self:Condition(), self:Assert(self:Block(), "Expected block after elseif condition")
 			chain[#chain + 1] = { cond, block }
 		end
 
 		if self:ConsumeValue(TokenVariant.Keyword, Keyword.Else) then
-			chain[#chain + 1] = { nil, self:Assert( self:Block(), "Expected block after else keyword") }
+			chain[#chain + 1] = { nil, self:Assert(self:Block(), "Expected block after else keyword") }
 		end
-
 		return Node.new(NodeVariant.If, chain, cond.trace:stitch(self:Prev().trace))
 	end
 
@@ -263,59 +275,43 @@ function Parser:Stmt()
 		if not self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
 			self:Error("Left Parenthesis (() must appear before condition")
 		end
-
-		local var = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected for numeric index" )
-		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Assignment operator (=) expected to preceed variable" )
-
+		local var = self:Assert(self:Consume(TokenVariant.Ident), "Variable expected for numeric index")
+		self:Assert(self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Assignment operator (=) expected to preceed variable")
 		local start = self:Expr()
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after start value" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after start value")
 		local stop = self:Expr()
-
 		local step
 		if self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 			step = self:Expr()
 		end
-
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close for statement" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close for statement")
 		return Node.new(NodeVariant.For, { var, start, stop, step, self:Block() }, trace:stitch(self:Prev().trace))
 	end
 
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Foreach) then
 		local trace = self:Prev().trace
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() missing after foreach statement" )
-
-		local key = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected to hold the key" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() missing after foreach statement")
+		local key = self:Assert(self:Consume(TokenVariant.Ident), "Variable expected to hold the key")
 		local key_type
 		if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 			key_type = self:Assert(self:Type(), "Type expected after colon")
 		end
-
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after key variable" )
-
-		local value = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected to hold the value" )
-		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Col), "Colon (:) expected to separate type from variable" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after key variable")
+		local value = self:Assert(self:Consume(TokenVariant.Ident), "Variable expected to hold the value")
+		self:Assert(self:ConsumeValue(TokenVariant.Operator, Operator.Col), "Colon (:) expected to separate type from variable")
 		local value_type = self:Assert(self:Type(), "Type expected after colon")
-		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Equals sign (=) expected after value type to specify table" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Equals sign (=) expected after value type to specify table")
 		local table = self:Expr()
-
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Missing right parenthesis after foreach statement" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Missing right parenthesis after foreach statement")
 		return Node.new(NodeVariant.Foreach, { key, key_type, value, value_type, table, self:Block() }, trace:stitch(self:Prev().trace))
 	end
 
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Break) then
 		return Node.new(NodeVariant.Break, nil, self:Prev().trace)
 	end
-
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Continue) then
 		return Node.new(NodeVariant.Continue, nil, self:Prev().trace)
 	end
-
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Return) then
 		local trace = self:Prev().trace
 		if self:ConsumeValue(TokenVariant.LowerIdent, "void") then
@@ -360,11 +356,9 @@ function Parser:Stmt()
 
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Const) then
 		local trace = self:Prev().trace
-
 		local name = self:Assert(self:Consume(TokenVariant.Ident), "Expected variable name after const")
-		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Expected = for constant declaration" )
+		self:Assert(self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Expected = for constant declaration")
 		local value = self:Assert(self:Expr(), "Expected expression for constant declaration")
-
 		return Node.new(NodeVariant.Const, { name, value }, trace:stitch(self:Prev().trace))
 	end
 
@@ -396,28 +390,25 @@ function Parser:Stmt()
 	-- Switch Case
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Switch) then
 		local trace = self:Prev().trace
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() expected before switch condition" )
-			local expr = self:Expr()
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) expected before switch condition" )
-
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LCurly), "Left curly bracket ({) expected after switch condition" )
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() expected before switch condition")
+		local expr = self:Expr()
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) expected before switch condition")
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LCurly), "Left curly bracket ({) expected after switch condition")
 		local cases, default = {}, nil
 		if not self:Eof() and not self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
-			self:Assert( self:ConsumeValue(TokenVariant.Keyword, Keyword.Case) or self:ConsumeValue(TokenVariant.Keyword, Keyword.Default), "Expected case or default in switch block" )
+			self:Assert(self:ConsumeValue(TokenVariant.Keyword, Keyword.Case) or self:ConsumeValue(TokenVariant.Keyword, Keyword.Default), "Expected case or default in switch block")
 			self.index = self.index - 1
-
 			while true do
 				local case, expr = self:ConsumeValue(TokenVariant.Keyword, Keyword.Case)
 				if case then
 					expr = self:Expr()
-					self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after case condition" )
+					self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after case condition")
 				end
 
 				local default_ = self:ConsumeValue(TokenVariant.Keyword, Keyword.Default)
 				if default_ then
 					self:Assert(not default, "Only one default case (default:) may exist.")
-					self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after default case" )
+					self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after default case")
 				elseif not case then
 					break
 				end
@@ -425,8 +416,7 @@ function Parser:Stmt()
 				if self:Eof() then
 					self:Error("Case block is missing after case declaration.")
 				end
-
-				local block --[=[@type Node[]]=] = {}
+				local block = {} --[=[@type Node[]]=]
 				while true do
 					if self:ConsumeValue(TokenVariant.Keyword, Keyword.Case) or self:ConsumeValue(TokenVariant.Keyword, Keyword.Default) or self:ConsumeValue(TokenVariant.Grammar, Grammar.RCurly) then
 						self.index = self.index - 1
@@ -439,10 +429,10 @@ function Parser:Stmt()
 
 					local stmt = self:Stmt() or self:Expr()
 					block[#block + 1] = stmt
-
 					if not self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
-						if self:Eof() then break end
-
+						if self:Eof() then
+							break
+						end
 						if not self:At().whitespaced then
 							self:Error("Statements must be separated by comma (,) or whitespace", stmt.trace)
 						end
@@ -459,39 +449,44 @@ function Parser:Stmt()
 			end
 		end
 
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RCurly), "Right curly bracket (}) missing, to close switch block")
-
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RCurly), "Right curly bracket (}) missing, to close switch block")
 		return Node.new(NodeVariant.Switch, { expr, cases, default }, trace:stitch(self:Prev().trace))
 	end
 
 	-- Function definition
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Function) then
-		local trace, type_or_name = self:Prev().trace, self:Assert( self:Type(), "Expected function return type or name after function keyword")
-
+		local trace, type_or_name = self:Prev().trace, self:Assert(self:Type(), "Expected function return type or name after function keyword")
 		if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 			-- function entity:xyz()
-			return Node.new(NodeVariant.Function, { nil, type_or_name, self:Assert(self:Consume(TokenVariant.LowerIdent), "Expected function name after colon (:)"), self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
+			return Node.new(
+				NodeVariant.Function,
+				{ nil, type_or_name, self:Assert(self:Consume(TokenVariant.LowerIdent), "Expected function name after colon (:)"), self:Parameters(), self:Block() },
+				trace:stitch(self:Prev().trace)
+			)
 		end
 
 		local meta_or_name = self:Consume(TokenVariant.LowerIdent)
 		if meta_or_name then
 			if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 				-- function void entity:xyz()
-				return Node.new(NodeVariant.Function, { type_or_name, meta_or_name, self:Assert(self:Consume(TokenVariant.LowerIdent), "Expected function name after colon (:)"), self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
+				return Node.new(
+					NodeVariant.Function,
+					{ type_or_name, meta_or_name, self:Assert(self:Consume(TokenVariant.LowerIdent), "Expected function name after colon (:)"), self:Parameters(), self:Block() },
+					trace:stitch(self:Prev().trace)
+				)
 			else
 				-- function void test()
 				return Node.new(NodeVariant.Function, { type_or_name, nil, meta_or_name, self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
 			end
 		else -- function test()
-			self:Assert( type_or_name.value ~= "function", "Identifier expected. \"function\" is a reserved keyword that cannot be used here", trace )
+			self:Assert(type_or_name.value ~= "function", 'Identifier expected. "function" is a reserved keyword that cannot be used here', trace)
 			return Node.new(NodeVariant.Function, { nil, nil, type_or_name, self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
 		end
 	end
 
 	-- #include
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword["#Include"]) then
-		local trace, path = self:Prev().trace, self:Assert( self:Consume(TokenVariant.String), "include path (string) expected after #include")
-
+		local trace, path = self:Prev().trace, self:Assert(self:Consume(TokenVariant.String), "include path (string) expected after #include")
 		self.include_files[#self.include_files + 1] = path.value
 		return Node.new(NodeVariant.Include, path.value, trace:stitch(path.trace))
 	end
@@ -499,27 +494,22 @@ function Parser:Stmt()
 	-- Try catch
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Try) then
 		local trace, stmt = self:Prev().trace, self:Block()
-
 		if self:ConsumeValue(TokenVariant.Keyword, Keyword.Catch) then
 			if not self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
 				self:Error("Left parenthesis (() expected after catch keyword")
 			end
-
 			local err_ident = self:Consume(TokenVariant.Ident)
 			if not err_ident then
 				self:Error("Variable expected after left parenthesis (() in catch statement")
 			end
-
 			local ty
 			if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 				ty = self:Assert(self:Type(), "Expected type name after : for error value", trace)
 			end
-
 			if not self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
 				self:Error("Right parenthesis ()) missing, to close catch statement")
 			end
-
-			return Node.new(NodeVariant.Try, {stmt, err_ident, ty, self:Block()}, trace:stitch(self:Prev().trace))
+			return Node.new(NodeVariant.Try, { stmt, err_ident, ty, self:Block() }, trace:stitch(self:Prev().trace))
 		else
 			self:Error("Try block must be followed by catch statement")
 		end
@@ -528,13 +518,13 @@ function Parser:Stmt()
 	-- Do while
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Do) then
 		local trace, block = self:Prev().trace, self:Block()
-		self:Assert( self:ConsumeValue(TokenVariant.Keyword, Keyword.While), "while expected after do and code block (do {...} )")
+		self:Assert(self:ConsumeValue(TokenVariant.Keyword, Keyword.While), "while expected after do and code block (do {...} )")
 		return Node.new(NodeVariant.While, { self:Condition(), block, true }, trace:stitch(self:Prev().trace))
 	end
 
 	-- Event
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Event) then
-		local trace, name = self:Prev().trace, self:Assert( self:Consume(TokenVariant.LowerIdent), "Expected event name after 'event' keyword")
+		local trace, name = self:Prev().trace, self:Assert(self:Consume(TokenVariant.LowerIdent), "Expected event name after 'event' keyword")
 		return Node.new(NodeVariant.Event, { name, self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
 	end
 end
@@ -544,7 +534,13 @@ function Parser:Type()
 	local type = self:Consume(TokenVariant.LowerIdent)
 	if type then
 		if type.value == "normal" then
-			self:Warning("Use of deprecated type [normal]", type.trace, { { at = type.trace, replace = "number" } })
+			self:Warning("Use of deprecated type [normal]", type.trace, {
+				{
+					at = type.trace,
+					replace = "number",
+				},
+			})
+
 			type.value = "number"
 		end
 	else -- workaround to allow "function" as type while also being a keyword
@@ -563,14 +559,13 @@ function Parser:Indices()
 	local indices = {}
 	while true do
 		local lsb = self:ConsumeTailing(TokenVariant.Grammar, Grammar.LSquare)
-		if not lsb then break end
-
+		if not lsb then
+			break
+		end
 		local exp = self:Expr()
-
 		if self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 			local type = self:Assert(self:Type(), "Indexing operator ([]) requires a valid type [X, t]")
-			local rsb = self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RSquare), "Right square bracket (]) missing, to close indexing operator [X,t]" )
-
+			local rsb = self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RSquare), "Right square bracket (]) missing, to close indexing operator [X,t]")
 			indices[#indices + 1] = { exp, type, lsb.trace:stitch(rsb.trace) }
 		elseif self:ConsumeTailing(TokenVariant.Grammar, Grammar.RSquare) then
 			indices[#indices + 1] = { exp, nil, lsb.trace:stitch(self:Prev().trace) }
@@ -578,18 +573,15 @@ function Parser:Indices()
 			self:Error("Indexing operator ([]) must not be preceded by whitespace")
 		end
 	end
-
 	return indices
 end
 
 function Parser:Block()
-	local lcb = self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LCurly), "Left curly bracket ({) expected for block" )
-
+	local lcb = self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LCurly), "Left curly bracket ({) expected for block")
 	local stmts = {}
 	if self:ConsumeValue(TokenVariant.Grammar, Grammar.RCurly) then
 		return Node.new(NodeVariant.Block, stmts, lcb.trace:stitch(self:Prev().trace))
 	end
-
 	if not self:Eof() then
 		while true do
 			if self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
@@ -599,13 +591,13 @@ function Parser:Block()
 			end
 
 			stmts[#stmts + 1] = self:Stmt() or self:Expr()
-
 			if self:ConsumeValue(TokenVariant.Grammar, Grammar.RCurly) then
 				return Node.new(NodeVariant.Block, stmts, lcb.trace:stitch(self:Prev().trace))
 			end
-
 			if not self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
-				if self:Eof() then break end
+				if self:Eof() then
+					break
+				end
 				self:Assert(self:At().whitespaced, "Statements must be separated by comma (,) or whitespace")
 			end
 		end
@@ -616,16 +608,13 @@ end
 
 --- `type` is nil in case of the default param type. (number)
 ---@alias Parameter { name: Token<string>, type: Token<string>?, variadic: boolean }
-
 ---@return Parameter[]?
 function Parser:Parameters()
-	self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() must appear for function parameters name")
-
+	self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() must appear for function parameters name")
 	local params = {}
 	if self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
 		return params
 	end
-
 	while true do
 		local variadic
 		if self:ConsumeValue(TokenVariant.Grammar, Grammar.LSquare) then
@@ -636,27 +625,33 @@ function Parser:Parameters()
 
 			local typ, len = nil, #params
 			if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
-				typ = self:Assert( self:Type(), "Expected type after colon (:)" )
+				typ = self:Assert(self:Type(), "Expected type after colon (:)")
 			else
 				self:Warning("You should explicitly mark the type of these parameters")
 			end
 
 			for k, name in ipairs(temp) do
-				params[len + k] = { name = name, type = typ, variadic = false }
+				params[len + k] = {
+					name = name,
+					type = typ,
+					variadic = false,
+				}
 			end
 		else
 			variadic = self:ConsumeValue(TokenVariant.Operator, Operator.Spread)
-
 			local name, type = self:Assert(self:Consume(TokenVariant.Ident), "Expected parameter name")
 			if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 				type = self:Assert(self:Type(), "Expected valid parameter type")
 			end
-
-			params[#params + 1] = { name = name, type = type, variadic = variadic ~= nil }
+			params[#params + 1] = {
+				name = name,
+				type = type,
+				variadic = variadic ~= nil,
+			}
 		end
 
 		if variadic then
-			self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Variadic parameter must be final in list" )
+			self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Variadic parameter must be final in list")
 			return params
 		elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 		elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
@@ -673,7 +668,6 @@ function Parser:Expr(ignore_assign)
 		if not ignore_assign and self:ConsumeValue(TokenVariant.Operator, Operator.Ass) then
 			self:Error("Assignment operator (=) must not be part of equation ( Did you mean == ? )")
 		end
-
 		if self:ConsumeValue(TokenVariant.Operator, Operator.Aadd) then
 			self:Error("Additive assignment operator (+=) must not be part of equation")
 		elseif self:ConsumeValue(TokenVariant.Operator, Operator.Asub) then
@@ -691,13 +685,11 @@ function Parser:Expr(ignore_assign)
 	local cond = self:Expr2()
 	if self:ConsumeValue(TokenVariant.Operator, Operator.Qsm) then
 		local if_true = self:Expr()
-
 		if not self:ConsumeValue(TokenVariant.Operator, Operator.Col) then -- perhaps we want to make sure there is space around this (method bug)
 			self:Error("Conditional operator (:) must appear after expression to complete conditional")
 		end
 
 		local if_false = self:Expr()
-
 		return Node.new(NodeVariant.ExprTernary, { cond, if_true, if_false }, cond.trace:stitch(if_true.trace):stitch(if_false.trace))
 	end
 
@@ -705,7 +697,6 @@ function Parser:Expr(ignore_assign)
 		local rhs = self:Expr()
 		return Node.new(NodeVariant.ExprDefault, { cond, rhs }, cond.trace:stitch(rhs.trace))
 	end
-
 	return cond
 end
 
@@ -725,7 +716,6 @@ function Parser:RecurseLeft(func, variant, tbl)
 			end
 		end
 	end
-
 	return lhs
 end
 
@@ -794,7 +784,6 @@ function Parser:Expr13()
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Not) then
 		self:Error("Logical not operator (!) must not be succeeded by whitespace")
 	end
-
 	return self:Expr14()
 end
 
@@ -812,7 +801,6 @@ function Parser:Arguments()
 	if self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
 		return arguments
 	end
-
 	repeat
 		arguments[#arguments + 1] = self:Expr()
 	until not self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma)
@@ -820,7 +808,6 @@ function Parser:Arguments()
 	if not self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
 		self:Error("Right parenthesis ()) missing, to close argument list")
 	end
-
 	return arguments
 end
 
@@ -841,26 +828,20 @@ function Parser:ArgumentsKV(start_bracket, end_bracket)
 	if self:ConsumeValue(TokenVariant.Grammar, end_bracket) then
 		return {}
 	end
-
 	local first = self:Expr(true)
-
 	if not self:ConsumeValue(TokenVariant.Operator, Operator.Ass) then
 		self.index = before
 		return
 	else
 		local arguments = { { first, self:Expr() } }
-
 		if self:ConsumeValue(TokenVariant.Grammar, end_bracket) then
 			return arguments
 		end
-
 		while true do
-			self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Expected comma (,) in between key value arguments" )
-
+			self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Expected comma (,) in between key value arguments")
 			local key = self:Expr()
-			self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Assignment operator (=) missing, to complete expression" )
-			arguments[#arguments + 1] = {key, self:Expr()}
-
+			self:Assert(self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Assignment operator (=) missing, to complete expression")
+			arguments[#arguments + 1] = { key, self:Expr() }
 			if self:ConsumeValue(TokenVariant.Grammar, end_bracket) then
 				return arguments
 			end
@@ -871,7 +852,6 @@ end
 ---@return Node
 function Parser:Expr14()
 	local expr = self:Expr15()
-
 	while true do
 		if self:ConsumeTailing(TokenVariant.Operator, Operator.Col) then
 			local fn = self:ConsumeTailing(TokenVariant.LowerIdent)
@@ -892,24 +872,19 @@ function Parser:Expr14()
 				self:Error("Indexing operator ([]) must not be preceded by whitespace")
 			elseif self:ConsumeTailing(TokenVariant.Grammar, Grammar.LParen) then
 				self.index = self.index - 1
-
 				local args, typ = self:Arguments()
-
 				if self:ConsumeValue(TokenVariant.Grammar, Grammar.LSquare) then
 					typ = self:Assert(self:Type(), "Return type operator ([]) requires a lower case type [type]")
-
 					if not self:ConsumeValue(TokenVariant.Grammar, Grammar.RSquare) then
 						self:Error("Right square bracket (]) missing, to close return type operator [type]")
 					end
 				end
-
 				return Node.new(NodeVariant.ExprDynCall, { expr, args, typ }, expr.trace:stitch(self:Prev().trace))
 			else
 				break
 			end
 		end
 	end
-
 	return expr
 end
 
@@ -917,7 +892,7 @@ end
 function Parser:Expr15()
 	if self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
 		local expr = self:Expr()
-		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close grouped equation" )
+		self:Assert(self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen), "Right parenthesis ()) missing, to close grouped equation")
 		return expr
 	end
 
@@ -929,7 +904,6 @@ function Parser:Expr15()
 		elseif fn.value == "table" then
 			return Node.new(NodeVariant.ExprTable, self:ArgumentsKV(Grammar.LParen, Grammar.RParen) or self:Arguments(), fn.trace:stitch(self:Prev().trace))
 		end
-
 		return Node.new(NodeVariant.ExprCall, { fn, self:Arguments() }, fn.trace:stitch(self:Prev().trace))
 	end
 
@@ -937,13 +911,11 @@ function Parser:Expr15()
 	if fn then
 		return Node.new(NodeVariant.ExprFunction, { self:Parameters(), self:Assert(self:Block(), "Expected block to follow function") }, fn.trace:stitch(self:Prev().trace))
 	end
-
 	-- Decimal / Hexadecimal / Binary numbers
 	local num = self:Consume(TokenVariant.Decimal) or self:Consume(TokenVariant.Hexadecimal) or self:Consume(TokenVariant.Binary)
 	if num then
 		return Node.new(NodeVariant.ExprLiteral, { "n", num.value }, num.trace)
 	end
-
 	-- Complex / Quaternion numbers
 	local adv_num = self:Consume(TokenVariant.Complex) or self:Consume(TokenVariant.Quat)
 	if adv_num then
@@ -953,15 +925,14 @@ function Parser:Expr15()
 		if suffix == "" then
 			value, type = num, "n"
 		elseif suffix == "i" then
-			value, type = {0, num}, "c"
+			value, type = { 0, num }, "c"
 		elseif suffix == "j" then
-			value, type = {0, 0, num, 0}, "q"
+			value, type = { 0, 0, num, 0 }, "q"
 		elseif suffix == "k" then
-			value, type = {0, 0, 0, num}, "q"
+			value, type = { 0, 0, 0, num }, "q"
 		else
 			self:Error("unrecognized numeric suffix " .. suffix)
 		end
-
 		return Node.new(NodeVariant.ExprLiteral, { type, value }, adv_num.trace)
 	end
 
@@ -970,9 +941,8 @@ function Parser:Expr15()
 	if str then
 		return Node.new(NodeVariant.ExprLiteral, { "s", str.value }, str.trace)
 	end
-
 	-- Unary Wiremod Operators
-	for _, v in ipairs { { "~", Operator.Trg }, { "$", Operator.Dlt }, { "->", Operator.Imp } } do
+	for _, v in ipairs({ { "~", Operator.Trg }, { "$", Operator.Dlt }, { "->", Operator.Imp } }) do
 		local op = self:ConsumeValue(TokenVariant.Operator, v[2])
 		if op then
 			local ident = self:ConsumeTailing(TokenVariant.Ident)
@@ -982,12 +952,12 @@ function Parser:Expr15()
 				else
 					self:Error("Operator (" .. v[1] .. ") must be followed by variable")
 				end
-			end ---@cast ident Token
+			end
 
+			---@cast ident Token
 			if v[2] == Operator.Dlt then -- TODO: Delete this and move to analyzer step
 				self.delta_vars[ident.value] = true
 			end
-
 			return Node.new(NodeVariant.ExprUnaryWire, { v[2], ident }, op.trace:stitch(ident.trace))
 		end
 	end
@@ -1010,24 +980,22 @@ function Parser:Expr15()
 	end
 
 	-- Variables
-	local ident =  self:Consume(TokenVariant.Ident)
+	local ident = self:Consume(TokenVariant.Ident)
 	if ident then
 		return Node.new(NodeVariant.ExprIdent, ident, ident.trace)
 	end
-
 	local constant = self:Consume(TokenVariant.Constant)
 	if constant then
 		return Node.new(NodeVariant.ExprConstant, constant, constant.trace)
 	end
-
 	-- Error Messages
 	if self:Eof() then
 		self:Error("Further input required at end of code, incomplete expression")
 	end
-
 	if self:ConsumeValue(TokenVariant.Operator, Operator.Add) then
 		self:Error("Addition operator (+) must be preceded by equation or value")
-	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Sub) then -- can't occur (unary minus)
+	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Sub) then
+		-- can't occur (unary minus)
 		self:Error("Subtraction operator (-) must be preceded by equation or value")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Mul) then
 		self:Error("Multiplication operator (*) must be preceded by equation or value")
@@ -1037,7 +1005,6 @@ function Parser:Expr15()
 		self:Error("Modulo operator (%) must be preceded by equation or value")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Exp) then
 		self:Error("Exponentiation operator (^) must be preceded by equation or value")
-
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Ass) then
 		self:Error("Assignment operator (=) must be preceded by variable")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Aadd) then
@@ -1048,12 +1015,10 @@ function Parser:Expr15()
 		self:Error("Multiplicative assignment operator (*=) must be preceded by variable")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Adiv) then
 		self:Error("Divisive assignment operator (/=) must be preceded by variable")
-
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.And) then
 		self:Error("Logical and operator (&) must be preceded by equation or value")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Or) then
 		self:Error("Logical or operator (|) must be preceded by equation or value")
-
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Eq) then
 		self:Error("Equality operator (==) must be preceded by equation or value")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Neq) then
@@ -1066,12 +1031,10 @@ function Parser:Expr15()
 		self:Error("Greater than operator (>) must be preceded by equation or value")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Leq) then
 		self:Error("Less than operator (<) must be preceded by equation or value")
-
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Inc) then
 		self:Error("Increment operator (++) must be preceded by variable")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Dec) then
 		self:Error("Decrement operator (--) must be preceded by variable")
-
 	elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.RParen) then
 		self:Error("Right parenthesis ()) without matching left parenthesis")
 	elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.LCurly) then
@@ -1082,14 +1045,12 @@ function Parser:Expr15()
 		self:Error("Left square bracket ([) must be preceded by variable")
 	elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.RSquare) then
 		self:Error("Right square bracket (]) without matching left square bracket")
-
 	elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma) then
 		self:Error("Comma (,) not expected here, missing an argument?")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 		self:Error("Method operator (:) must not be preceded by whitespace")
 	elseif self:ConsumeValue(TokenVariant.Operator, Operator.Spread) then
 		self:Error("Spread operator (...) must only be used as a function parameter")
-
 	elseif self:ConsumeValue(TokenVariant.Keyword, Keyword.If) then
 		self:Error("If keyword (if) must not appear inside an equation")
 	elseif self:ConsumeValue(TokenVariant.Keyword, Keyword.Elseif) then

@@ -1,30 +1,30 @@
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_wire_entity" )
-ENT.PrintName		= "Wire Trail"
-ENT.WireDebugName 	= "Trail"
-ENT.RenderGroup		= RENDERGROUP_BOTH
-
-if CLIENT then return end -- No more client
+DEFINE_BASECLASS("base_wire_entity")
+ENT.PrintName = "Wire Trail"
+ENT.WireDebugName = "Trail"
+ENT.RenderGroup = RENDERGROUP_BOTH
+if CLIENT then -- No more client
+	return
+end
 
 function ENT:Initialize()
-	self:PhysicsInit( SOLID_VPHYSICS )
-	self:SetMoveType( MOVETYPE_VPHYSICS )
-	self:SetSolid( SOLID_VPHYSICS )
-	self.Inputs = WireLib.CreateInputs(self, {"Set", "Length","StartSize","EndSize","R","G","B","A"})
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:SetSolid(SOLID_VPHYSICS)
+	self.Inputs = WireLib.CreateInputs(self, { "Set", "Length", "StartSize", "EndSize", "R", "G", "B", "A" })
 	self.Outputs = WireLib.CreateOutputs(self, {})
-
 	self.Trail = {
 		Color = Color(255, 255, 255, 255),
 		Length = 5,
 		StartSize = 32,
 		EndSize = 0,
-		Material = "trails/lol"
+		Material = "trails/lol",
 	}
 end
 
 function ENT:Setup(Trail)
 	self.Trail = table.Merge(self.Trail, Trail)
-	self:SetOverlayText( "Trail: " .. Trail.Material )
+	self:SetOverlayText("Trail: " .. Trail.Material)
 end
 
 function ENT:TriggerInput(iname, value)

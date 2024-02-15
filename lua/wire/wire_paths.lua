@@ -7,45 +7,57 @@
 -- well as as a non-empty polyline along the wire. (Each point in the line
 -- has both a parent entity, and a local offset from that entity.)
 --
-
-if not WireLib then return end
-
+if not WireLib then
+	return
+end
 if CLIENT then
 	net.Receive("WireLib.Paths.TransmitPath", function(length)
 		local path = {
-			Path = {}
+			Path = {},
 		}
+
 		path.Entity = net.ReadEntity()
-		if not path.Entity:IsValid() then return end
+		if not path.Entity:IsValid() then
+			return
+		end
 		path.Name = net.ReadString()
 		path.Width = net.ReadFloat()
-		if path.Width<=0 then
+		if path.Width <= 0 then
 			if path.Entity.WirePaths then
 				path.Entity.WirePaths[path.Name] = nil
 			end
 			return
 		end
+
 		path.StartPos = net.ReadVector()
 		path.Material = net.ReadString()
 		path.Color = net.ReadColor()
-
 		local num_points = net.ReadUInt(16)
 		for i = 1, num_points do
-			path.Path[i] = { Entity = net.ReadEntity(), Pos = net.ReadVector() }
+			path.Path[i] = {
+				Entity = net.ReadEntity(),
+				Pos = net.ReadVector(),
+			}
 		end
 
-		if path.Entity.WirePaths == nil then path.Entity.WirePaths = {} end
+		if path.Entity.WirePaths == nil then
+			path.Entity.WirePaths = {}
+		end
 		path.Entity.WirePaths[path.Name] = path
-
 	end)
 	return
 end
 
 WireLib.Paths = {}
-local transmit_queues = WireLib.RegisterPlayerTable(setmetatable({}, { __index = function(t,p) t[p] = {} return t[p] end }))
+local transmit_queues = WireLib.RegisterPlayerTable(setmetatable({}, {
+	__index = function(t, p)
+		t[p] = {}
+		return t[p]
+	end,
+}))
+
 util.AddNetworkString("WireLib.Paths.RequestPaths")
 util.AddNetworkString("WireLib.Paths.TransmitPath")
-
 net.Receive("WireLib.Paths.RequestPaths", function(length, ply)
 	local ent = net.ReadEntity()
 	if ent:IsValid() and ent.Inputs then
@@ -62,7 +74,7 @@ local function TransmitPath(input, ply)
 	local color = input.Color
 	net.WriteEntity(input.Entity)
 	net.WriteString(input.Name)
-	if not input.Src or input.Width<=0 then
+	if not input.Src or input.Width <= 0 then
 		net.WriteFloat(0)
 	else
 		net.WriteFloat(input.Width)
@@ -75,6 +87,7 @@ local function TransmitPath(input, ply)
 			net.WriteVector(point.Pos)
 		end
 	end
+
 	net.Send(ply)
 end
 
@@ -91,6 +104,7 @@ local function ProcessQueue()
 			transmit_queues[ply] = nil
 		end
 	end
+
 	if not next(transmit_queues) then
 		timer.Remove("WireLib.Paths.ProcessQueue")
 	end
@@ -105,6 +119,7 @@ function WireLib.Paths.Add(input, ply)
 			table.insert(transmit_queues[player], input)
 		end
 	end
+
 	if not timer.Exists("WireLib.Paths.ProcessQueue") then
 		timer.Create("WireLib.Paths.ProcessQueue", 0, 0, ProcessQueue)
 	end

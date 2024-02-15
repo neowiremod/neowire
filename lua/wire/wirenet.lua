@@ -2,18 +2,13 @@
 	Consolidated networking library for Wiremod.
 	Trivial Networking - A wrapper for sending very small net messages that don't need a whole networkstring.
 ]]
-
 local Net = WireLib.Net or {}
 WireLib.Net = Net
-
 -- Trivial Networking
 Net.Trivial = {}
 local SIZE = 10 -- 1023 names
-
 local registered_handlers = {}
-
 local update_handlers
-
 local function msg_handler(len, ply)
 	local handler = registered_handlers[net.ReadUInt(SIZE)]
 	if handler then
@@ -24,10 +19,8 @@ local function msg_handler(len, ply)
 end
 
 net.Receive("wirelib_net_message", msg_handler)
-
 if SERVER then
 	util.AddNetworkString("wirelib_net_message")
-
 	local handler_names = {}
 	local handler_queue = {}
 	local queue_handler_firstidx, queue_handler_lastidx
@@ -35,33 +28,38 @@ if SERVER then
 		tbl = tbl or handler_queue
 		first = first or queue_handler_firstidx
 		last = last or queue_handler_lastidx
-
 		if first and first <= last then
 			net.Start("wirelib_net_message")
-				net.WriteUInt(0, SIZE)
-				net.WriteUInt(first, SIZE)
-				net.WriteUInt(last, SIZE)
+			net.WriteUInt(0, SIZE)
+			net.WriteUInt(first, SIZE)
+			net.WriteUInt(last, SIZE)
+			for _, v in ipairs(tbl) do
+				net.WriteUInt(#v, 8)
+			end
 
-				for _, v in ipairs(tbl) do
-					net.WriteUInt(#v, 8)
-				end
+			local data = table.concat(tbl)
+			if #data < 4096 then
+				data = util.Compress(data)
+				net.WriteBool(false)
+				net.WriteUInt(#data, 12)
+				net.WriteData(data)
+			else
+				net.WriteBool(true)
+				net.WriteStream(data, nil, false)
+			end
 
-				local data = table.concat(tbl)
+			if ply then
+				net.Send(ply)
+			else
+				net.Broadcast()
+			end
 
-				if #data < 4096 then
-					data = util.Compress(data)
-					net.WriteBool(false)
-					net.WriteUInt(#data, 12)
-					net.WriteData(data)
-				else
-					net.WriteBool(true)
-					net.WriteStream(data, nil, false)
-				end
-			if ply then net.Send(ply) else net.Broadcast() end
-
-			if tbl == handler_queue then queue_handler_firstidx, queue_handler_lastidx, handler_queue = nil, nil, {} end
+			if tbl == handler_queue then
+				queue_handler_firstidx, queue_handler_lastidx, handler_queue = nil, nil, {}
+			end
 		end
 	end
+
 	local function queue_handler_update(idx, name)
 		if queue_handler_firstidx then
 			if queue_handler_lastidx + 1 == idx then
@@ -69,17 +67,13 @@ if SERVER then
 				queue_handler_lastidx = idx
 			else
 				queue_handler_flush()
-
 				queue_handler_firstidx, queue_handler_lastidx = idx, idx
 				handler_queue[1] = name
-
 				timer.Create("wirelib_net_flush", 0, 1, queue_handler_flush)
 			end
-
 		else
 			queue_handler_firstidx, queue_handler_lastidx = idx, idx
 			handler_queue[1] = name
-
 			timer.Create("wirelib_net_flush", 0, 1, queue_handler_flush)
 		end
 	end
@@ -98,20 +92,21 @@ if SERVER then
 			else
 				num_handlers = num_handlers + 1
 			end
+
 			registered_handlers[name] = num_handlers
 			registered_handlers[num_handlers] = callback
 			handler_idx = num_handlers
-
 			queue_handler_update(handler_idx, name)
 		else
 			registered_handlers[handler_idx] = callback
 		end
+
 		handler_names[handler_idx] = name
 	end
+
 	registered_handlers[0] = function(_, ply)
 		error(string.format("WireLib.Net.Trivial received invalid message from %s (Player %d, Entity %d)", ply:SteamID(), ply:UserID(), ply:EntIndex()))
 	end
-
 	--- Starts a trivial net message within a normal Gmod net context.
 	--- Use net functions normally after this.
 	---@param name string
@@ -124,6 +119,7 @@ if SERVER then
 			queue_handler_flush() -- Force flush in case the client doesn't have this particular name
 			idx = registered_handlers[name]
 		end
+
 		net.Start("wirelib_net_message", unreliable)
 		net.WriteUInt(idx, SIZE)
 	end
@@ -137,7 +133,6 @@ if SERVER then
 	end
 
 	gameevent.Listen("player_activate")
-
 	hook.Add("player_activate", "wirenet_ff_player", function(d)
 		queue_handler_flush(Player(d.userid), handler_names, 1, #handler_names)
 	end)
@@ -166,9 +161,7 @@ else -- CLIENT
 	local function internal_update()
 		local begin = net.ReadUInt(SIZE)
 		local last = net.ReadUInt(SIZE)
-
 		local lens = {}
-
 		for i = 1, last - begin + 1 do
 			lens[i] = net.ReadUInt(8)
 		end
@@ -183,7 +176,6 @@ else -- CLIENT
 	end
 
 	registered_handlers[0] = internal_update
-
 	--- Starts a trivial net message within a normal Gmod net context.
 	--- Use net functions normally after this.
 	---@param name string

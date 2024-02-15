@@ -1,8 +1,37 @@
 __e2setcost(2)
-
 --This seemed faster then manually typing out all 30 e2functions
-local from_easings = {"OutElastic","OutCirc","InOutQuint","InCubic","InOutCubic","InOutBounce","InOutSine","OutQuad","InOutCirc","InElastic","OutBack","InQuint","InSine","InBounce","InQuart","OutSine","OutExpo","InOutExpo","InQuad","InOutElastic","InOutQuart","InExpo","OutCubic","OutQuint","OutBounce","InCirc","InBack","InOutQuad","OutQuart","InOutBack"}
-
+local from_easings = {
+	"OutElastic",
+	"OutCirc",
+	"InOutQuint",
+	"InCubic",
+	"InOutCubic",
+	"InOutBounce",
+	"InOutSine",
+	"OutQuad",
+	"InOutCirc",
+	"InElastic",
+	"OutBack",
+	"InQuint",
+	"InSine",
+	"InBounce",
+	"InQuart",
+	"OutSine",
+	"OutExpo",
+	"InOutExpo",
+	"InQuad",
+	"InOutElastic",
+	"InOutQuart",
+	"InExpo",
+	"OutCubic",
+	"OutQuint",
+	"OutBounce",
+	"InCirc",
+	"InBack",
+	"InOutQuad",
+	"OutQuart",
+	"InOutBack",
+}
 for k, v in pairs(from_easings) do
 	local function_call = math.ease[v]
 	local name = "ease" .. v

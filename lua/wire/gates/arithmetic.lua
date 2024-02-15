@@ -1,21 +1,18 @@
 --[[
 		Arithmetic Gates
 ]]
-
 GateActions("Arithmetic")
-
 GateActions["increment"] = {
 	name = "Increment",
 	dsecription = "Increases its value by a number on every clk.",
 	inputs = { "A", "Clk", "Reset" },
 	output = function(gate, A, Clk, Reset)
-		local clk = ( Clk > 0 )
-		local reset = ( Reset > 0 )
-
-		if ( gate.PrevValue ~= clk ) then
+		local clk = Clk > 0
+		local reset = Reset > 0
+		if gate.PrevValue ~= clk then
 			gate.PrevValue = clk
-			if ( clk ) then
-				if ( gate.Memory == nil ) then
+			if clk then
+				if gate.Memory == nil then
 					gate.Memory = A
 				else
 					gate.Memory = gate.Memory + A
@@ -23,18 +20,17 @@ GateActions["increment"] = {
 			end
 		end
 
-		if( gate.PrevReset ~= reset ) then
+		if gate.PrevReset ~= reset then
 			gate.PrevReset = reset
-			if ( reset ) then
+			if reset then
 				gate.Memory = 0
 			end
 		end
-
 		return gate.Memory
 	end,
 	label = function(Out, A)
 		return "LastNum += " .. A .. " = " .. Out
-	end
+	end,
 }
 
 GateActions["identity"] = {
@@ -44,8 +40,8 @@ GateActions["identity"] = {
 		return A
 	end,
 	label = function(Out, A)
-		return A.." = "..Out
-	end
+		return A .. " = " .. Out
+	end,
 }
 
 GateActions["negate"] = {
@@ -55,20 +51,22 @@ GateActions["negate"] = {
 		return -A
 	end,
 	label = function(Out, A)
-		return "-"..A.." = "..Out
-	end
+		return "-" .. A .. " = " .. Out
+	end,
 }
 
 GateActions["inverse"] = {
 	name = "Inverse",
 	inputs = { "A" },
 	output = function(gate, A)
-		if (A) and (math.abs(A) >= 0.0001) then return 1/A end
+		if A and (math.abs(A) >= 0.0001) then
+			return 1 / A
+		end
 		return 0
 	end,
 	label = function(Out, A)
-		return "1/"..A.." = "..Out
-	end
+		return "1/" .. A .. " = " .. Out
+	end,
 }
 
 GateActions["sqrt"] = {
@@ -81,9 +79,9 @@ GateActions["sqrt"] = {
 		--[[if ( A < 0 ) then
 			return "sqrt("..A..") = i"..Out -- Display as imaginary if A is negative
 		else]]
-			return "sqrt("..A..") = "..Out
+		return "sqrt(" .. A .. ") = " .. Out
 		--end
-	end
+	end,
 }
 
 GateActions["log"] = {
@@ -93,8 +91,8 @@ GateActions["log"] = {
 		return math.log(A)
 	end,
 	label = function(Out, A)
-		return "log("..A..") = "..Out
-	end
+		return "log(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["log10"] = {
@@ -104,8 +102,8 @@ GateActions["log10"] = {
 		return math.log10(A)
 	end,
 	label = function(Out, A)
-		return "log10("..A..") = "..Out
-	end
+		return "log10(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["abs"] = {
@@ -115,21 +113,25 @@ GateActions["abs"] = {
 		return math.abs(A)
 	end,
 	label = function(Out, A)
-		return "abs("..A..") = "..Out
-	end
+		return "abs(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["sgn"] = {
 	name = "Sign (-1,0,1)",
 	inputs = { "A" },
 	output = function(gate, A)
-		if (A > 0) then return 1 end
-		if (A < 0) then return -1 end
+		if A > 0 then
+			return 1
+		end
+		if A < 0 then
+			return -1
+		end
 		return 0
 	end,
 	label = function(Out, A)
-		return "sgn("..A..") = "..Out
-	end
+		return "sgn(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["floor"] = {
@@ -139,24 +141,24 @@ GateActions["floor"] = {
 		return math.floor(A)
 	end,
 	label = function(Out, A)
-		return "floor("..A..") = "..Out
-	end
+		return "floor(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["round"] = {
 	name = "Round",
-	inputs = { "A" , "B" },
+	inputs = { "A", "B" },
 	output = function(gate, A, B)
 		if B then
-			B=math.Clamp(B,-50,50)
-			return math.Round(A,B)
+			B = math.Clamp(B, -50, 50)
+			return math.Round(A, B)
 		else
 			return math.Round(A)
 		end
 	end,
-	label = function(Out, A , B)
-		return "round("..A..","..B..") = "..Out
-	end
+	label = function(Out, A, B)
+		return "round(" .. A .. "," .. B .. ") = " .. Out
+	end,
 }
 
 GateActions["ceil"] = {
@@ -166,8 +168,8 @@ GateActions["ceil"] = {
 		return math.ceil(A)
 	end,
 	label = function(Out, A)
-		return "ceil("..A..") = "..Out
-	end
+		return "ceil(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["+"] = {
@@ -176,18 +178,22 @@ GateActions["+"] = {
 	compact_inputs = 2,
 	output = function(gate, ...)
 		local result = 0
-		for k,v in ipairs({...}) do
-			if (v) then result = result+v end
+		for k, v in ipairs({ ... }) do
+			if v then
+				result = result + v
+			end
 		end
 		return result
 	end,
 	label = function(Out, ...)
 		local txt = ""
-		for k,v in ipairs({...}) do
-			if (v) then txt = txt..v.." + " end
+		for k, v in ipairs({ ... }) do
+			if v then
+				txt = txt .. v .. " + "
+			end
 		end
-		return string.sub(txt, 1, -4).." = "..Out
-	end
+		return string.sub(txt, 1, -4) .. " = " .. Out
+	end,
 }
 
 GateActions["-"] = {
@@ -195,11 +201,11 @@ GateActions["-"] = {
 	inputs = { "A", "B" },
 	colors = { Color(255, 0, 0, 255), Color(0, 0, 255, 255) },
 	output = function(gate, A, B)
-		return A-B
+		return A - B
 	end,
 	label = function(Out, A, B)
-		return A.." - "..B.." = "..Out
-	end
+		return A .. " - " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["*"] = {
@@ -208,42 +214,50 @@ GateActions["*"] = {
 	compact_inputs = 2,
 	output = function(gate, ...)
 		local result = 1
-		for k,v in ipairs({...}) do
-			if (v) then result = result*v end
+		for k, v in ipairs({ ... }) do
+			if v then
+				result = result * v
+			end
 		end
 		return result
 	end,
 	label = function(Out, ...)
 		local txt = ""
-		for k,v in ipairs({...}) do
-			if (v) then txt = txt..v.." * " end
+		for k, v in ipairs({ ... }) do
+			if v then
+				txt = txt .. v .. " * "
+			end
 		end
-		return string.sub(txt, 1, -4).." = "..Out
-	end
+		return string.sub(txt, 1, -4) .. " = " .. Out
+	end,
 }
 
 GateActions["/"] = {
 	name = "Divide",
 	inputs = { "A", "B" },
 	output = function(gate, A, B)
-		if (math.abs(B) < 0.0001) then return 0 end
-		return A/B
+		if math.abs(B) < 0.0001 then
+			return 0
+		end
+		return A / B
 	end,
 	label = function(Out, A, B)
-		return A.." / "..B.." = "..Out
-	end
+		return A .. " / " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["%"] = {
 	name = "Modulo",
 	inputs = { "A", "B" },
 	output = function(gate, A, B)
-		if ( B == 0 ) then return 0 end
-		return math.fmod(A,B)
+		if B == 0 then
+			return 0
+		end
+		return math.fmod(A, B)
 	end,
 	label = function(Out, A, B)
-		return A.." % "..B.." = "..Out
-	end
+		return A .. " % " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["rand"] = {
@@ -251,22 +265,22 @@ GateActions["rand"] = {
 	inputs = { "A", "B" },
 	timed = true,
 	output = function(gate, A, B)
-		return math.random()*(B-A)+A
+		return math.random() * (B - A) + A
 	end,
 	label = function(Out, A, B)
-		return "random("..A.." - "..B..") = "..Out
-	end
+		return "random(" .. A .. " - " .. B .. ") = " .. Out
+	end,
 }
 
 GateActions["PI"] = {
 	name = "PI",
-	inputs = { },
+	inputs = {},
 	output = function(gate)
 		return math.pi
 	end,
 	label = function(Out)
-		return "PI = "..Out
-	end
+		return "PI = " .. Out
+	end,
 }
 
 GateActions["exp"] = {
@@ -277,8 +291,8 @@ GateActions["exp"] = {
 		return math.exp(A)
 	end,
 	label = function(Out, A)
-		return "exp("..A..") = "..Out
-	end
+		return "exp(" .. A .. ") = " .. Out
+	end,
 }
 
 GateActions["pow"] = {
@@ -288,20 +302,22 @@ GateActions["pow"] = {
 		return A ^ B
 	end,
 	label = function(Out, A, B)
-		return "pow("..A..", "..B..") = "..Out
-	end
+		return "pow(" .. A .. ", " .. B .. ") = " .. Out
+	end,
 }
 
 GateActions["and/add"] = {
 	name = "And/Add",
-	inputs = { "A", "B"},
+	inputs = { "A", "B" },
 	output = function(gate, A, B)
-		if ((A) and (A <= 0)) or ((B) and (B <= 0)) then return 0 end
-		return A+B
+		if (A and (A <= 0)) or (B and (B <= 0)) then
+			return 0
+		end
+		return A + B
 	end,
 	label = function(Out, A, B)
-		return A.." and/and "..B.." = "..Out
-	end
+		return A .. " and/and " .. B .. " = " .. Out
+	end,
 }
 
 GateActions["Percent"] = {
@@ -309,12 +325,14 @@ GateActions["Percent"] = {
 	inputs = { "Value", "Max" },
 	compact_inputs = 2,
 	output = function(gate, Value, Max)
-		if (math.abs(Max) < 0.0001) then return 0 end
+		if math.abs(Max) < 0.0001 then
+			return 0
+		end
 		return Value / Max * 100
 	end,
 	label = function(Out, Value, Max)
-		return Value.." / "..Max.." * 100 = "..Out.."%"
-	end
+		return Value .. " / " .. Max .. " * 100 = " .. Out .. "%"
+	end,
 }
 
 GateActions["Delta"] = {
@@ -331,8 +349,8 @@ GateActions["Delta"] = {
 		gate.PrevValue = 0
 	end,
 	label = function(Out, A)
-		return "Delta("..A..") "
-	end
+		return "Delta(" .. A .. ") "
+	end,
 }
 
 GateActions["Delta360"] = {
@@ -342,14 +360,14 @@ GateActions["Delta360"] = {
 		gate.PrevValue = gate.PrevValue or 0
 		local delta = A - gate.PrevValue
 		gate.PrevValue = A
-		return ( math.fmod( (math.fmod( delta, 360 ) + 540 ), 360 ) - 180 )
+		return math.fmod(math.fmod(delta, 360) + 540, 360) - 180
 	end,
 	reset = function(gate)
 		gate.PrevValue = 0
 	end,
 	label = function(Out, A)
-		return "Delta("..A..") "
-	end
+		return "Delta(" .. A .. ") "
+	end,
 }
 
 GateActions["Average"] = {
@@ -359,7 +377,7 @@ GateActions["Average"] = {
 	output = function(gate, ...)
 		local vals = 0
 		local value = 0
-		for k,v in ipairs({...}) do
+		for k, v in ipairs({ ... }) do
 			vals = vals + 1
 			value = value + v
 		end
@@ -368,64 +386,62 @@ GateActions["Average"] = {
 	label = function(Out, ...)
 		local vals = 0
 		local message = "("
-		for k,v in ipairs({...}) do
+		for k, v in ipairs({ ... }) do
 			vals = vals + 1
 			message = message .. v .. " + "
 		end
-		message = string.sub(message,1,-4)
+
+		message = string.sub(message, 1, -4)
 		message = message .. ") / " .. vals .. " = " .. Out
 		return message
-	end
+	end,
 }
-
 
 GateActions["increment/decrement"] = {
 	name = "Increment/Decrement",
 	description = "Increases and decreases its value by a number.",
 	inputs = { "A", "Increment", "Decrement", "Reset" },
 	output = function(gate, A, Increment, Decrement, Reset)
-		local increment = ( Increment > 0 )
-		local decrement = ( Decrement > 0 )
-		local reset = (Reset > 0)
-
-		if ( gate.PrevValue ~= increment ) then
+		local increment = Increment > 0
+		local decrement = Decrement > 0
+		local reset = Reset > 0
+		if gate.PrevValue ~= increment then
 			gate.PrevValue = increment
-			if ( increment ) then
+			if increment then
 				gate.Memory = (gate.Memory or 0) + A
 			end
 		end
 
-		if ( gate.PrevValue ~= decrement ) then
+		if gate.PrevValue ~= decrement then
 			gate.PrevValue = decrement
-			if ( decrement ) then
+			if decrement then
 				gate.Memory = (gate.Memory or 0) - A
 			end
 		end
 
-		if( gate.PrevReset ~= reset ) then
+		if gate.PrevReset ~= reset then
 			gate.PrevReset = reset
-			if ( reset ) then
+			if reset then
 				gate.Memory = 0
 			end
 		end
-
 		return gate.Memory
 	end,
 	label = function(Out, A)
 		return "(" .. A .. " +/- LastNum) = " .. Out
-	end
+	end,
 }
 
 GateActions["clamp"] = {
 	group = "Arithmetic",
 	name = "Clamp",
 	inputs = { "A", "Min", "Max" },
-	output = function( gate, A, Min, Max )
-		return math.Clamp( A, Min, Max )
+	output = function(gate, A, Min, Max)
+		return math.Clamp(A, Min, Max)
 	end,
-	label = function( Out, A, Min, Max )
+	label = function(Out, A, Min, Max)
 		return "Clamp(" .. A .. "," .. Min .. "," .. Max .. ") = " .. Out
-	end
+	end,
 }
 
 GateActions()

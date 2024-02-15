@@ -1,19 +1,15 @@
-
 if CLIENT then
 	local EGP_HUD_FirstPrint = true
 	local tbl = {}
-
 	local cvarHudPrint = CreateClientConVar("wire_egp_hud_print", "1", true, false, "Controls whether you are notified when you connect to an EGP HUD")
-
 	--------------------------------------------------------
 	-- Paint
 	--------------------------------------------------------
 	local makeArray = EGP.ParentingFuncs.makeArray
 	local makeTable = EGP.ParentingFuncs.makeTable
-
 	local function scaleObject(bool, v)
 		local xMin, xMax, yMin, yMax, _xMul, _yMul
-		if (bool) then -- 512 -> screen
+		if bool then -- 512 -> screen
 			xMin = 0
 			xMax = 512
 			yMin = 0
@@ -29,17 +25,24 @@ if CLIENT then
 			_yMul = 512
 		end
 
-		local xMul = _xMul/(xMax-xMin)
-		local yMul = _yMul/(yMax-yMin)
-
+		local xMul = _xMul / (xMax - xMin)
+		local yMul = _yMul / (yMax - yMin)
 		if v.verticesindex then
 			local r = makeArray(v, true)
-			for i=1,#r,2 do
+			for i = 1, #r, 2 do
 				r[i] = (r[i] - xMin) * xMul
-				r[i+1] = (r[i+1]- yMin) * yMul
+				r[i + 1] = (r[i + 1] - yMin) * yMul
 			end
+
 			local settings = {}
-			if isstring(v.verticesindex) then settings = { [v.verticesindex] = makeTable( v, r ) } else v.vertices = makeTable(v, r) end
+			if isstring(v.verticesindex) then
+				settings = {
+					[v.verticesindex] = makeTable(v, r),
+				}
+			else
+				v.vertices = makeTable(v, r)
+			end
+
 			v:EditObject(settings)
 		else
 			if v.x then
@@ -55,11 +58,11 @@ if CLIENT then
 				v.h = v.h * yMul
 			end
 		end
+
 		v.res = bool
 	end
 
 	local egpDraw = EGP.Draw
-
 	local function hudPaint()
 		for ent in pairs(tbl) do
 			if not ent or not ent:IsValid() then
@@ -69,7 +72,6 @@ if CLIENT then
 					if ent.gmod_wire_egp_hud then
 						local resolution = ent:GetResolution(false)
 						local rt = ent.RenderTable
-
 						for _, v in ipairs(rt) do
 							if (v.res or false) ~= resolution then
 								scaleObject(not v.res, v)
@@ -94,24 +96,24 @@ if CLIENT then
 		end
 	end
 
-
 	--------------------------------------------------------
 	-- Toggle
 	--------------------------------------------------------
 	local function EGP_Use()
 		local ent = net.ReadEntity()
-		if not ent or not ent:IsValid() then return end
-
+		if not ent or not ent:IsValid() then
+			return
+		end
 		if net.ReadBool() then -- Enable
 			tbl[ent] = true
-
-			if ent.gmod_wire_egp_hud then ent:EGP_Update() end
+			if ent.gmod_wire_egp_hud then
+				ent:EGP_Update()
+			end
 			hook.Add("HUDPaint", "EGP_HUDPaint", hudPaint)
 		else
 			tbl[ent] = nil
-
 			if next(tbl) == nil then
-				hook.Remove("HUDPaint","EGP_HUDPaint")
+				hook.Remove("HUDPaint", "EGP_HUDPaint")
 			end
 		end
 
@@ -128,31 +130,30 @@ if CLIENT then
 			end
 		end
 	end
-	net.Receive("EGP_HUD_Use", EGP_Use)
 
+	net.Receive("EGP_HUD_Use", EGP_Use)
 	--------------------------------------------------------
 	-- Disconnect all HUDs
 	--------------------------------------------------------
-	concommand.Add("wire_egp_hud_unlink",function()
+	concommand.Add("wire_egp_hud_unlink", function()
 		LocalPlayer():ChatPrint("[EGP] Disconnected from all EGP HUDs.")
 		tbl = {}
-		hook.Remove("HUDPaint","EGP_HUDPaint")
+		hook.Remove("HUDPaint", "EGP_HUDPaint")
 		net.Start("EGP_HUD_Unlink")
 		net.SendToServer()
 	end)
 else -- SERVER
 	local vehiclelinks = {}
-
 	local function EGPHudConnect(ent, state, ply)
 		if state then
-			if not ent.Users then ent.Users = {} end
-
+			if not ent.Users then
+				ent.Users = {}
+			end
 			if not ent.Users[ply] then
 				ent.Users[ply] = true
 			end
 		elseif ent.Users and ent.Users[ply] then
 			ent.Users[ply] = nil
-
 			if table.IsEmpty(ent.Users) and not ent.IsEGPHUD then
 				ent.Users = nil
 			end
@@ -161,12 +162,13 @@ else -- SERVER
 		end
 
 		E2Lib.triggerEvent("egpHudConnect", { ent, ply, state and 1 or 0 })
-
-		net.Start("EGP_HUD_Use") net.WriteEntity(ent) net.WriteBool(state) net.Send(ply)
-
+		net.Start("EGP_HUD_Use")
+		net.WriteEntity(ent)
+		net.WriteBool(state)
+		net.Send(ply)
 	end
-	EGP.EGPHudConnect = EGPHudConnect
 
+	EGP.EGPHudConnect = EGPHudConnect
 	local function unlinkUser(ply)
 		local egps = ents.FindByClass("gmod_wire_egp*")
 		for _, egp in pairs(egps) do
@@ -178,24 +180,24 @@ else -- SERVER
 	end
 
 	util.AddNetworkString("EGP_HUD_Unlink")
-
 	net.Receive("EGP_HUD_Unlink", function(_, ply)
 		unlinkUser(ply)
 	end)
-
 	function EGP:LinkHUDToVehicle(hud, vehicle)
-		if not hud.LinkedVehicles then hud.LinkedVehicles = {} end
-		if not hud.Marks then hud.Marks = {} end
-
+		if not hud.LinkedVehicles then
+			hud.LinkedVehicles = {}
+		end
+		if not hud.Marks then
+			hud.Marks = {}
+		end
 		hud.Marks[#hud.Marks + 1] = vehicle
 		hud.LinkedVehicles[vehicle] = true
 		vehiclelinks[hud] = hud.LinkedVehicles
-
 		vehicle:CallOnRemove("EGP HUD unlink on remove", function(ent)
 			EGP:UnlinkHUDFromVehicle(hud, ent)
 		end)
-
-		timer.Simple(0.1, function() -- timers solve everything (this time, it's the fact that the entity isn't valid on the client after dupe)
+		timer.Simple(0.1, function()
+			-- timers solve everything (this time, it's the fact that the entity isn't valid on the client after dupe)
 			WireLib.SendMarks(hud)
 		end)
 	end
@@ -209,6 +211,7 @@ else -- SERVER
 					end
 				end
 			end
+
 			vehiclelinks[hud] = nil
 			hud.LinkedVehicles = nil
 			hud.Marks = nil
@@ -246,16 +249,16 @@ else -- SERVER
 		WireLib.SendMarks(hud)
 	end
 
-	hook.Add("PlayerEnteredVehicle","EGP_HUD_PlayerEnteredVehicle",function(ply, vehicle)
-		for k, v in pairs( vehiclelinks ) do
+	hook.Add("PlayerEnteredVehicle", "EGP_HUD_PlayerEnteredVehicle", function(ply, vehicle)
+		for k, v in pairs(vehiclelinks) do
 			if v[vehicle] ~= nil then
 				EGPHudConnect(k, true, ply)
 			end
 		end
 	end)
 
-	hook.Add("PlayerLeaveVehicle","EGP_HUD_PlayerLeaveVehicle",function(ply, vehicle)
-		for k, v in pairs( vehiclelinks ) do
+	hook.Add("PlayerLeaveVehicle", "EGP_HUD_PlayerLeaveVehicle", function(ply, vehicle)
+		for k, v in pairs(vehiclelinks) do
 			if v[vehicle] ~= nil then
 				EGPHudConnect(k, false, ply)
 			end

@@ -1,30 +1,32 @@
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_wire_entity" )
-ENT.PrintName		= "Wire Water Sensor"
-ENT.WireDebugName 	= "Water Sensor"
-
-if CLIENT then return end -- No more client
+DEFINE_BASECLASS("base_wire_entity")
+ENT.PrintName = "Wire Water Sensor"
+ENT.WireDebugName = "Water Sensor"
+if CLIENT then -- No more client
+	return
+end
 
 function ENT:Initialize()
-	self:PhysicsInit( SOLID_VPHYSICS )
-	self:SetMoveType( MOVETYPE_VPHYSICS )
-	self:SetSolid( SOLID_VPHYSICS )
-	self.Outputs = WireLib.CreateOutputs(self, {"Out"})
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:SetSolid(SOLID_VPHYSICS)
+	self.Outputs = WireLib.CreateOutputs(self, { "Out" })
 end
 
 function ENT:ShowOutput()
-	self:SetOverlayText( (self:WaterLevel()>0) and "Submerged" or "Above Water" )
+	self:SetOverlayText((self:WaterLevel() > 0) and "Submerged" or "Above Water")
 end
 
 function ENT:Think()
 	BaseClass.Think(self)
-	if(self:WaterLevel()>0)then
-		WireLib.TriggerOutput(self,"Out",1)
+	if self:WaterLevel() > 0 then
+		WireLib.TriggerOutput(self, "Out", 1)
 	else
-		WireLib.TriggerOutput(self,"Out",0)
+		WireLib.TriggerOutput(self, "Out", 0)
 	end
+
 	self:ShowOutput()
-	self:NextThink(CurTime()+0.125)
+	self:NextThink(CurTime() + 0.125)
 end
 
 duplicator.RegisterEntityClass("gmod_wire_watersensor", WireLib.MakeWireEnt, "Data")

@@ -4,16 +4,19 @@ local ent_tool_mappings = {
 }
 
 local ent_tool_patterns = {
-	{"^.*$", ent_tool_mappings},
-
-	{"^prop_", "!weapon_physgun"},
-	bogus = {"^gmod_(.*)$", true}, -- The bogus index ensures that this always is iterated last, so extensions can override it.
+	{ "^.*$", ent_tool_mappings },
+	{ "^prop_", "!weapon_physgun" },
+	bogus = {
+		"^gmod_(.*)$", -- The bogus index ensures that this always is iterated last, so extensions can override it.
+		true,
+	},
 }
 
 local function pattern_mappings(ent, class, ntapped)
 	local function maprep(replacement, result, ...)
-		if not result then return end
-
+		if not result then
+			return
+		end
 		if replacement == true then
 			return result
 		elseif isstring(replacement) then
@@ -23,38 +26,40 @@ local function pattern_mappings(ent, class, ntapped)
 			if narray == 0 then
 				return maprep(replacement[result], result, ...)
 			else
-				return maprep(replacement[((ntapped-1) % narray)+1], result, ...)
+				return maprep(replacement[((ntapped - 1) % narray) + 1], result, ...)
 			end
 		elseif isfunction(replacement) then
 			return maprep(replacement(ent, ntapped, result, ...), result, ...)
 		end
 	end
 
-	for _,pattern,replacement in pairs_map(ent_tool_patterns, unpack) do
+	for _, pattern, replacement in pairs_map(ent_tool_patterns, unpack) do
 		local ret = maprep(replacement, class:match(pattern))
-		if ret then return ret end
+		if ret then
+			return ret
+		end
 	end
 end
 
 local lastent = NULL
 local ntapped = 0
-
 concommand.Add("gmod_tool_auto", function(ply, command, args)
 	local trace = ply:GetEyeTrace()
 	local ent = trace.Entity
 	local class = ent:GetClass()
-
 	if ent ~= lastent then
 		lastent = ent
 		ntapped = 0
 	end
+
 	ntapped = ntapped + 1
 	local toolmode = pattern_mappings(ent, class, ntapped)
-
-	if not toolmode then return end
+	if not toolmode then
+		return
+	end
 	local weapon = toolmode:match("^!(.*)$")
 	if weapon then
-		RunConsoleCommand( "use", weapon )
+		RunConsoleCommand("use", weapon)
 		return
 	end
 
@@ -62,26 +67,30 @@ concommand.Add("gmod_tool_auto", function(ply, command, args)
 end)
 
 local toolbuttons = {}
-hook.Add("PostReloadToolsMenu", "toolcpanel_ListTools",function()
+hook.Add("PostReloadToolsMenu", "toolcpanel_ListTools", function()
 	local toolmenu = g_SpawnMenu:GetToolMenu()
-	for toolpanelid=1,#toolmenu.ToolPanels do
+	for toolpanelid = 1, #toolmenu.ToolPanels do
 		if toolmenu:GetToolPanel(toolpanelid) and toolmenu:GetToolPanel(toolpanelid).List.GetChildren and toolmenu:GetToolPanel(toolpanelid).List:GetChildren()[1] then
-			for sectionid,section in pairs(toolmenu:GetToolPanel(toolpanelid).List:GetChildren()[1]:GetChildren()) do
-				for buttonid,button in pairs(section:GetChildren()) do
-					if tobool(button.Command) then toolbuttons[button.Command] = button end
+			for sectionid, section in pairs(toolmenu:GetToolPanel(toolpanelid).List:GetChildren()[1]:GetChildren()) do
+				for buttonid, button in pairs(section:GetChildren()) do
+					if tobool(button.Command) then
+						toolbuttons[button.Command] = button
+					end
 				end
 			end
 		end
 	end
 end)
-concommand.Add("toolcpanel", function(ply,cmd,args)
-	local panel = toolbuttons["gmod_tool "..args[1]]
-	if panel then panel:DoClick() end
+
+concommand.Add("toolcpanel", function(ply, cmd, args)
+	local panel = toolbuttons["gmod_tool " .. args[1]]
+	if panel then
+		panel:DoClick()
+	end
 end)
 
 -- extension interface:
 gmod_tool_auto = {}
-
 local lastuniqueid = 0
 --- Adds a pattern to be matched against the entity class for gmod_tool_auto. Good for packs with some kind of naming scheme.
 --- Returns a uniqueid that can be used to remove the pattern later.
@@ -96,13 +105,13 @@ local lastuniqueid = 0
 --- The table/array lookups and function calls are done recursively.
 function gmod_tool_auto.AddPattern(pattern, replacement, index)
 	lastuniqueid = lastuniqueid + 1
-	table.insert(ent_tool_patterns, index or #ent_tool_patterns+1, { pattern, replacement, lastuniqueid })
+	table.insert(ent_tool_patterns, index or #ent_tool_patterns + 1, { pattern, replacement, lastuniqueid })
 	return lastuniqueid
 end
 
 --- Removes a pattern given by uniqueid
 function gmod_tool_auto.RemovePattern(uniqueid)
-	for i,pattern,replacement,uid in ipairs_map(ent_tool_patterns, unpack) do
+	for i, pattern, replacement, uid in ipairs_map(ent_tool_patterns, unpack) do
 		if uniqueid == uid then
 			table.remove(ent_tool_patterns, i)
 			return pattern, replacement
@@ -127,7 +136,11 @@ function gmod_tool_auto.GetTables()
 	return ent_tool_patterns, ent_tool_mappings
 end
 
-local hook = {Add=function(a,b,c)c()end}
+local hook = {
+	Add = function(a, b, c)
+		c()
+	end,
+}
 
 --------------------------------- wiremod part ---------------------------------
 local wiremod_mappings = {
@@ -140,13 +153,14 @@ local wiremod_mappings = {
 }
 
 -- Cycle with wire_adv and wire_debugger.
-for k,v in pairs(wiremod_mappings) do
+for k, v in pairs(wiremod_mappings) do
 	wiremod_mappings[k] = { v, "wire_adv", "wire_debugger" }
 end
 
 hook.Add("Initialize", "gmod_tool_auto_wiremod", function()
-	if not gmod_tool_auto then return end
-
+	if not gmod_tool_auto then
+		return
+	end
 	gmod_tool_auto.AddPattern("^gmod_(wire_.*)$", { true, "wire_adv", "wire_debugger" })
 	gmod_tool_auto.AddSimpleMultiple(wiremod_mappings)
 end)
@@ -158,9 +172,13 @@ local rd_mappings = {
 }
 
 hook.Add("Initialize", "gmod_tool_auto_resource_distribution", function()
-	if not gmod_tool_auto then return end
-
-	gmod_tool_auto.AddPattern("^rd_.*_valve$", { "valves", "rd3_dev_link2" })-- TODO: add valve links?
+	if not gmod_tool_auto then
+		return
+	end
+	gmod_tool_auto.AddPattern("^rd_.*_valve$", {
+		"valves", -- TODO: add valve links?
+		"rd3_dev_link2",
+	})
 
 	gmod_tool_auto.AddSimpleMultiple(rd_mappings)
 end)
@@ -173,19 +191,19 @@ local ls_mappings = {
 }
 
 -- Cycle with smart link tool.
-for k,v in pairs(ls_mappings) do
+for k, v in pairs(ls_mappings) do
 	ls_mappings[k] = { v, "rd3_dev_link2" }
 end
 
 hook.Add("Initialize", "gmod_tool_auto_life_support", function()
-	if not gmod_tool_auto then return end
-
-	gmod_tool_auto.AddPattern("^storage_.*$",   { "ls3_receptacles", "rd3_dev_link2" })
+	if not gmod_tool_auto then
+		return
+	end
+	gmod_tool_auto.AddPattern("^storage_.*$", { "ls3_receptacles", "rd3_dev_link2" })
 	gmod_tool_auto.AddPattern("^generator_.*$", { "ls3_energysystems", "rd3_dev_link2" })
-	gmod_tool_auto.AddPattern("^other_.*$",     { "ls3_environmental_control", "rd3_dev_link2" })
-	gmod_tool_auto.AddPattern("^base_.*$",      { "ls3_environmental_control", "rd3_dev_link2" })
-	gmod_tool_auto.AddPattern("^nature_.*$",    { "ls3_environmental_control", "rd3_dev_link2" })
-
+	gmod_tool_auto.AddPattern("^other_.*$", { "ls3_environmental_control", "rd3_dev_link2" })
+	gmod_tool_auto.AddPattern("^base_.*$", { "ls3_environmental_control", "rd3_dev_link2" })
+	gmod_tool_auto.AddPattern("^nature_.*$", { "ls3_environmental_control", "rd3_dev_link2" })
 	gmod_tool_auto.AddSimpleMultiple(ls_mappings)
 end)
 
@@ -197,12 +215,13 @@ local spacebuild_mappings = {
 }
 
 -- Cycle with smart link tool.
-for k,v in pairs(spacebuild_mappings) do
+for k, v in pairs(spacebuild_mappings) do
 	spacebuild_mappings[k] = { v, "rd3_dev_link2" }
 end
 
 hook.Add("Initialize", "gmod_tool_auto_life_support", function()
-	if not gmod_tool_auto then return end
-
+	if not gmod_tool_auto then
+		return
+	end
 	gmod_tool_auto.AddSimpleMultiple(spacebuild_mappings)
 end)

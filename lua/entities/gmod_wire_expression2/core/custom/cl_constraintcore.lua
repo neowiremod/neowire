@@ -20,11 +20,15 @@ E2Helper.Descriptions["hydraulic(nevbvn)"] = "Creates a hydraulic constraint wit
 E2Helper.Descriptions["hydraulic(nbvbvn)"] = "Creates a hydraulic constraint with a referenceid, between two bones, at vectors local to each"
 E2Helper.Descriptions["hydraulic(nevevnnsnn)"] = "Creates a hydraulic constraint with a referenceid, between two entities, at vectors local to each, with constant, damping, and stretch only"
 E2Helper.Descriptions["hydraulic(nbvbvnnnsnn)"] = "Creates a hydraulic constraint with a referenceid, between two bones, at vectors local to each, with constant, damping, relative damping material, width, and stretch only"
-E2Helper.Descriptions["hydraulic(nevbvnnnsnn)"] = "Creates a hydraulic constraint with a referenceid, between and entity and a bone, at vectors local to each, with constant, damping, relative damping material, width, and stretch only"
+E2Helper.Descriptions["hydraulic(nevbvnnnsnn)"] =
+	"Creates a hydraulic constraint with a referenceid, between and entity and a bone, at vectors local to each, with constant, damping, relative damping material, width, and stretch only"
 E2Helper.Descriptions["hydraulic(nevevnnnsnn)"] = "Creates a hydraulic constraint with a referenceid, between two entities, at vectors local to each, with constant, damping, relative damping material, width, and stretch only"
-E2Helper.Descriptions["hydraulic(nbvbvnnnsnnv)"] = "Creates a hydraulic constraint with a referenceid, between two bones, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
-E2Helper.Descriptions["hydraulic(nevbvnnnsnnv)"] = "Creates a hydraulic constraint with a referenceid, between an entity and a bone, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
-E2Helper.Descriptions["hydraulic(nevevnnnsnnv)"] = "Creates a hydraulic constraint with a referenceid, between two entities, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
+E2Helper.Descriptions["hydraulic(nbvbvnnnsnnv)"] =
+	"Creates a hydraulic constraint with a referenceid, between two bones, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
+E2Helper.Descriptions["hydraulic(nevbvnnnsnnv)"] =
+	"Creates a hydraulic constraint with a referenceid, between an entity and a bone, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
+E2Helper.Descriptions["hydraulic(nevevnnnsnnv)"] =
+	"Creates a hydraulic constraint with a referenceid, between two entities, at vectors local to each, with constant, damping, relative damping, material, width, stretch only, and color"
 E2Helper.Descriptions["rope(nbvbv)"] = "Creates a rope constraint with a referenceid, between two bones, at vectors local to each"
 E2Helper.Descriptions["rope(nevbv)"] = "Creates a rope constraint with a referenceid, between an entity and a bone, at vectors local to each"
 E2Helper.Descriptions["rope(nevev)"] = "Creates a rope constraint with a referenceid, between two entities, at vectors local to each"

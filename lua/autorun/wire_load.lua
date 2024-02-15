@@ -13,8 +13,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-]]--
-
+]]
+--
 if VERSION < 140403 and VERSION > 5 then
 	-- VERSION > 5 check added June 2013, to address issues regarding the Steampipe update sometimes setting VERSION to 1.
 	ErrorNoHalt("WireMod: This branch of wiremod only supports Gmod13+.\n")
@@ -24,7 +24,6 @@ end
 if SERVER then
 	-- this file
 	AddCSLuaFile("autorun/wire_load.lua")
-
 	-- shared includes
 	AddCSLuaFile("wire/wire_paths.lua")
 	AddCSLuaFile("wire/wireshared.lua")
@@ -36,7 +35,6 @@ if SERVER then
 	AddCSLuaFile("wire/flir.lua")
 	AddCSLuaFile("wire/von.lua")
 	AddCSLuaFile("wire/sh_modelplug.lua")
-
 	-- client includes
 	AddCSLuaFile("wire/client/cl_wirelib.lua")
 	AddCSLuaFile("wire/client/cl_modelplug.lua")
@@ -56,20 +54,18 @@ if SERVER then
 	AddCSLuaFile("wire/client/thrusterlib.lua")
 	AddCSLuaFile("wire/client/rendertarget_fix.lua")
 	AddCSLuaFile("wire/client/customspawnmenu.lua")
-
 	-- text editor
 	AddCSLuaFile("wire/client/text_editor/issue_viewer.lua")
 	AddCSLuaFile("wire/client/text_editor/texteditor.lua")
 	AddCSLuaFile("wire/client/text_editor/wire_expression2_editor.lua")
-
-	for _, filename in ipairs(file.Find("wire/client/text_editor/modes/*.lua","LUA")) do
+	for _, filename in ipairs(file.Find("wire/client/text_editor/modes/*.lua", "LUA")) do
 		AddCSLuaFile("wire/client/text_editor/modes/" .. filename)
 	end
 
-	if CreateConVar("wire_force_workshop", 1, {FCVAR_ARCHIVE}, "Should Wire force all clients to download the Workshop edition of Wire, for models? (requires restart to disable)"):GetBool() then
+	if CreateConVar("wire_force_workshop", 1, { FCVAR_ARCHIVE }, "Should Wire force all clients to download the Workshop edition of Wire, for models? (requires restart to disable)"):GetBool() then
 		resource.AddWorkshop("160250458")
 	end
-  	resource.AddFile("resource/fonts/alphalcd.ttf")
+	resource.AddFile("resource/fonts/alphalcd.ttf")
 end
 
 -- shared includes
@@ -83,7 +79,6 @@ include("wire/gpulib.lua")
 include("wire/timedpairs.lua")
 include("wire/flir.lua")
 include("wire/von.lua")
-
 -- server includes
 if SERVER then
 	include("wire/server/wirelib.lua")
@@ -117,9 +112,13 @@ if CLIENT then
 end
 
 -- Load UWSVN, done here so its definitely after Wire is loaded.
-if file.Find("wire/uwsvn_load.lua","LUA")[1] then
-	if SERVER then AddCSLuaFile( "wire/uwsvn_load.lua" ) end
+if file.Find("wire/uwsvn_load.lua", "LUA")[1] then
+	if SERVER then
+		AddCSLuaFile("wire/uwsvn_load.lua")
+	end
 	include("wire/uwsvn_load.lua")
 end
 
-if SERVER then print("Wiremod Version '"..WireLib.GetVersion().."' loaded") end
+if SERVER then
+	print("Wiremod Version '" .. WireLib.GetVersion() .. "' loaded")
+end

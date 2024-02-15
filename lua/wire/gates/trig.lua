@@ -1,21 +1,19 @@
 --[[
 		Trig Gates
 ]]
-
 GateActions("Trig")
-
 GateActions["quadratic"] = {
 	name = "Quadratic Formula",
 	description = "Solves for X in the quadratic equation.",
 	inputs = { "A", "B", "C" },
 	outputs = { "Pos", "Neg" },
 	output = function(gate, A, B, C)
-		local temp = math.sqrt(B^2 - 4*A*C)
-		return (-B + temp) / (2*A), (-B - temp) / (2*A)
+		local temp = math.sqrt(B ^ 2 - 4 * A * C)
+		return (-B + temp) / (2 * A), (-B - temp) / (2 * A)
 	end,
-	label = function(Out,A,B,C)
-		return ("AX^2 + BX + C\n(-%s +/- sqrt(%s^2 - 4*%s*%s)) / (2*%s) = %s,%s"):format( B, B, A, C, A, Out.Pos, Out.Neg )
-	end
+	label = function(Out, A, B, C)
+		return ("AX^2 + BX + C\n(-%s +/- sqrt(%s^2 - 4*%s*%s)) / (2*%s) = %s,%s"):format(B, B, A, C, A, Out.Pos, Out.Neg)
+	end,
 }
 
 GateActions["sin"] = {
@@ -25,8 +23,8 @@ GateActions["sin"] = {
 		return math.sin(A)
 	end,
 	label = function(Out, A)
-		return "sin("..A.."rad) = "..Out
-	end
+		return "sin(" .. A .. "rad) = " .. Out
+	end,
 }
 
 GateActions["cos"] = {
@@ -36,8 +34,8 @@ GateActions["cos"] = {
 		return math.cos(A)
 	end,
 	label = function(Out, A)
-		return "cos("..A.."rad) = "..Out
-	end
+		return "cos(" .. A .. "rad) = " .. Out
+	end,
 }
 
 GateActions["tan"] = {
@@ -47,8 +45,8 @@ GateActions["tan"] = {
 		return math.tan(A)
 	end,
 	label = function(Out, A)
-		return "tan("..A.."rad) = "..Out
-	end
+		return "tan(" .. A .. "rad) = " .. Out
+	end,
 }
 
 GateActions["asin"] = {
@@ -58,8 +56,8 @@ GateActions["asin"] = {
 		return math.asin(A)
 	end,
 	label = function(Out, A)
-		return "asin("..A..") = "..Out.."rad"
-	end
+		return "asin(" .. A .. ") = " .. Out .. "rad"
+	end,
 }
 
 GateActions["acos"] = {
@@ -69,8 +67,8 @@ GateActions["acos"] = {
 		return math.acos(A)
 	end,
 	label = function(Out, A)
-		return "acos("..A..") = "..Out.."rad"
-	end
+		return "acos(" .. A .. ") = " .. Out .. "rad"
+	end,
 }
 
 GateActions["atan"] = {
@@ -80,8 +78,8 @@ GateActions["atan"] = {
 		return math.atan(A)
 	end,
 	label = function(Out, A)
-		return "atan("..A..") = "..Out.."rad"
-	end
+		return "atan(" .. A .. ") = " .. Out .. "rad"
+	end,
 }
 
 GateActions["sin_d"] = {
@@ -91,8 +89,8 @@ GateActions["sin_d"] = {
 		return math.sin(math.rad(A))
 	end,
 	label = function(Out, A)
-		return "sin("..A.."deg) = "..Out
-	end
+		return "sin(" .. A .. "deg) = " .. Out
+	end,
 }
 
 GateActions["cos_d"] = {
@@ -102,8 +100,8 @@ GateActions["cos_d"] = {
 		return math.cos(math.rad(A))
 	end,
 	label = function(Out, A)
-		return "cos("..A.."deg) = "..Out
-	end
+		return "cos(" .. A .. "deg) = " .. Out
+	end,
 }
 
 GateActions["tan_d"] = {
@@ -113,8 +111,8 @@ GateActions["tan_d"] = {
 		return math.tan(math.rad(A))
 	end,
 	label = function(Out, A)
-		return "tan("..A.."deg) = "..Out
-	end
+		return "tan(" .. A .. "deg) = " .. Out
+	end,
 }
 
 GateActions["asin_d"] = {
@@ -124,8 +122,8 @@ GateActions["asin_d"] = {
 		return math.deg(math.asin(A))
 	end,
 	label = function(Out, A)
-		return "asin("..A..") = "..Out.."deg"
-	end
+		return "asin(" .. A .. ") = " .. Out .. "deg"
+	end,
 }
 
 GateActions["acos_d"] = {
@@ -135,8 +133,8 @@ GateActions["acos_d"] = {
 		return math.deg(math.acos(A))
 	end,
 	label = function(Out, A)
-		return "acos("..A..") = "..Out.."deg"
-	end
+		return "acos(" .. A .. ") = " .. Out .. "deg"
+	end,
 }
 
 GateActions["atan_d"] = {
@@ -146,8 +144,8 @@ GateActions["atan_d"] = {
 		return math.deg(math.atan(A))
 	end,
 	label = function(Out, A)
-		return "atan("..A..") = "..Out.."deg"
-	end
+		return "atan(" .. A .. ") = " .. Out .. "deg"
+	end,
 }
 
 GateActions["rad2deg"] = {
@@ -157,8 +155,8 @@ GateActions["rad2deg"] = {
 		return math.deg(A)
 	end,
 	label = function(Out, A)
-		return A.."rad = "..Out.."deg"
-	end
+		return A .. "rad = " .. Out .. "deg"
+	end,
 }
 
 GateActions["deg2rad"] = {
@@ -168,8 +166,8 @@ GateActions["deg2rad"] = {
 		return math.rad(A)
 	end,
 	label = function(Out, A)
-		return A.."deg = "..Out.."rad"
-	end
+		return A .. "deg = " .. Out .. "rad"
+	end,
 }
 
 GateActions["angdiff"] = {
@@ -180,7 +178,7 @@ GateActions["angdiff"] = {
 	end,
 	label = function(Out, A, B)
 		return A .. "deg - " .. B .. "deg = " .. Out .. "deg"
-	end
+	end,
 }
 
 GateActions["angdiff_d"] = {
@@ -191,18 +189,18 @@ GateActions["angdiff_d"] = {
 	end,
 	label = function(Out, A, B)
 		return A .. "deg - " .. B .. "deg = " .. Out .. "deg"
-	end
+	end,
 }
 
 GateActions["atan2"] = {
 	name = "Atan2",
 	inputs = { "A", "B" },
-	output = function( gate, A, B )
-		return math.atan2( A, B )
+	output = function(gate, A, B)
+		return math.atan2(A, B)
 	end,
-	label = function( Out, A, B )
+	label = function(Out, A, B)
 		return "atan2(" .. A .. "," .. B .. ") = " .. Out
-	end
+	end,
 }
 
 GateActions()

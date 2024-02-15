@@ -7,8 +7,10 @@ E2Helper.Descriptions["propSpawn(svn)"] = "Model path, Position, Frozen Spawns a
 E2Helper.Descriptions["propSpawn(evn)"] = "Entity template, Position, Frozen Spawns a prop with the model of the template entity at the position denoted by the vector. If frozen is 0, then it will spawn unfrozen."
 E2Helper.Descriptions["propSpawn(san)"] = "Model path, Rotation, Frozen Spawns a prop with the model denoted by the string filepath and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
 E2Helper.Descriptions["propSpawn(ean)"] = "Rotation, Frozen Spawns a prop with the model of the template entity and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
-E2Helper.Descriptions["propSpawn(svan)"] = "Model path, Position, Rotation, Frozen Spawns a prop with the model denoted by the string file path, at the position denoted by the vector, and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
-E2Helper.Descriptions["propSpawn(evan)"] = "Position, Rotation, Frozen Spawns a prop with the model of the template entity, at the position denoted by the vector, and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
+E2Helper.Descriptions["propSpawn(svan)"] =
+	"Model path, Position, Rotation, Frozen Spawns a prop with the model denoted by the string file path, at the position denoted by the vector, and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
+E2Helper.Descriptions["propSpawn(evan)"] =
+	"Position, Rotation, Frozen Spawns a prop with the model of the template entity, at the position denoted by the vector, and rotated to the angle given. If frozen is 0, then it will spawn unfrozen."
 E2Helper.Descriptions["seatSpawn(sn)"] = "Model path, Frozen Spawns a prop with the model denoted by the string filepath. If frozen is 0, then it will spawn unfrozen."
 E2Helper.Descriptions["seatSpawn(svan)"] = E2Helper.Descriptions["seatSpawn(sn)"]
 E2Helper.Descriptions["seatSpawn(svans)"] = E2Helper.Descriptions["seatSpawn(sn)"] .. " String seatType, determines what animations the seat will have. For example phx_seat2 and phx_seat3 will have Jeep and Airboat animations."

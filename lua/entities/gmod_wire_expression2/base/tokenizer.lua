@@ -11,14 +11,10 @@
 		* emmylua annotations
 		* skips past errors
 ]]
-
 AddCSLuaFile()
-
 local Trace, Warning, Error = E2Lib.Debug.Trace, E2Lib.Debug.Warning, E2Lib.Debug.Error
-
 local tonumber = tonumber
 local string_find, string_gsub, string_sub = string.find, string.gsub, string.sub
-
 ---@class Tokenizer
 ---@field pos integer
 ---@field col integer
@@ -27,49 +23,37 @@ local string_find, string_gsub, string_sub = string.find, string.gsub, string.su
 ---@field warnings Warning[]
 local Tokenizer = {}
 Tokenizer.__index = Tokenizer
-
 function Tokenizer.new()
 	return setmetatable({}, Tokenizer)
 end
 
 E2Lib.Tokenizer = Tokenizer
-
 ---@enum TokenVariant
 local TokenVariant = {
 	Whitespace = 1, -- Used internally, won't be given to the parser.
-
 	Hexadecimal = 2,
 	Binary = 3,
 	Decimal = 4,
 	Quat = 5, -- quat number (4j, 4k)
 	Complex = 6, -- complex number literal (4i)
-
 	String = 7, -- "foo"
-
 	Boolean = 8, -- true, false
-
 	Grammar = 9, -- [] () {} ,
 	Operator = 10, -- += + / *
-
 	Keyword = 11,
 	LowerIdent = 12, -- function_name
-
 	Ident = 13, -- VariableName
 	Discard = 14, -- _
-
 	Constant = 15, -- _CONST
 }
 
 Tokenizer.Variant = TokenVariant
-
 local VariantLookup = {}
-
 for k, v in pairs(TokenVariant) do
 	VariantLookup[v] = k
 end
 
 Tokenizer.VariantLookup = VariantLookup
-
 ---@class Token<T>: { value: T, variant: TokenVariant, whitespaced: boolean, trace: Trace }
 ---@field variant TokenVariant
 ---@field whitespaced boolean
@@ -77,9 +61,7 @@ Tokenizer.VariantLookup = VariantLookup
 ---@field value any
 local Token = {}
 Token.__index = Token
-
 Tokenizer.Token = Token
-
 --- Creates a new (partially filled) token
 --- Line, column and whitespaced need to be added manually.
 ---@generic T
@@ -87,7 +69,10 @@ Tokenizer.Token = Token
 ---@param value T
 ---@return Token<T>
 function Token.new(variant, value)
-	return setmetatable({ variant = variant, value = value }, Token)
+	return setmetatable({
+		variant = variant,
+		value = value,
+	}, Token)
 end
 
 --- Returns a debug representation of a token
@@ -103,8 +88,8 @@ function Token:debug()
 		return string.format("Token { variant = %s, value = %s, trace = %s }", VariantLookup[self.variant], self.value, self.trace)
 	end
 end
-Token.__tostring = Token.debug
 
+Token.__tostring = Token.debug
 --- Returns the 'name' of a token for passing to a user.
 ---@return string
 function Token:display()
@@ -125,7 +110,6 @@ end
 function Tokenizer.Execute(code)
 	local instance = Tokenizer.new()
 	local tokens = instance:Process(code)
-
 	local ok = #instance.errors == 0
 	return ok, ok and tokens or instance.errors, instance
 end
@@ -134,7 +118,7 @@ end
 ---@param trace Trace?
 ---@param quick_fix { replace: string, at: Trace }[]?
 function Tokenizer:Error(message, trace, quick_fix)
-	self.errors[#self.errors + 1] = Error.new( message, trace or self:GetTrace(), nil, quick_fix )
+	self.errors[#self.errors + 1] = Error.new(message, trace or self:GetTrace(), nil, quick_fix)
 	return false
 end
 
@@ -142,12 +126,12 @@ end
 ---@param trace Trace?
 ---@param quick_fix { replace: string, at: Trace }[]?
 function Tokenizer:Warning(message, trace, quick_fix)
-	self.warnings[#self.warnings + 1] = Warning.new( message, trace or self:GetTrace(), quick_fix )
+	self.warnings[#self.warnings + 1] = Warning.new(message, trace or self:GetTrace(), quick_fix)
 end
 
 local escapes = {
 	["\\"] = "\\",
-	["\""] = "\"",
+	['"'] = '"',
 	["a"] = "\a",
 	["b"] = "\b",
 	["f"] = "\f",
@@ -155,7 +139,7 @@ local escapes = {
 	["r"] = "\r",
 	["t"] = "\t",
 	["v"] = "\v",
-	["0"] = "\0"
+	["0"] = "\0",
 }
 
 local bit_band = bit.band
@@ -165,24 +149,14 @@ local string_char = string.char
 local function toUnicodeChar(v)
 	if v < 0x80 then -- Single-byte sequence
 		return string_char(v)
-	elseif v < 0x800 then -- Two-byte sequence
-		return string_char(
-			bit_bor(0xC0, bit_band(bit_rshift(v, 6), 0x3F)),
-			bit_bor(0x80, bit_band(v, 0x3F))
-		 )
-	elseif v < 0x10000 then -- Three-byte sequence
-		 return string_char(
-			bit_bor(0xE0, bit_band(bit_rshift(v, 12), 0x3F)),
-			bit_bor(0x80, bit_band(bit_rshift(v, 6), 0x3F)),
-			bit_bor(0x80, bit_band(v, 0x3F))
-		 )
+	elseif v < 0x800 then
+		-- Two-byte sequence
+		return string_char(bit_bor(0xC0, bit_band(bit_rshift(v, 6), 0x3F)), bit_bor(0x80, bit_band(v, 0x3F)))
+	elseif v < 0x10000 then
+		-- Three-byte sequence
+		return string_char(bit_bor(0xE0, bit_band(bit_rshift(v, 12), 0x3F)), bit_bor(0x80, bit_band(bit_rshift(v, 6), 0x3F)), bit_bor(0x80, bit_band(v, 0x3F)))
 	else -- Four-byte sequence
-		return string_char(
-			bit_bor(0xF0, bit_band(bit_rshift(v, 18), 0x07)),
-			bit_bor(0x80, bit_band(bit_rshift(v, 12), 0x3F)),
-			bit_bor(0x80, bit_band(bit_rshift(v, 6), 0x3F)),
-			bit_bor(0x80, bit_band(v, 0x3F))
-		 )
+		return string_char(bit_bor(0xF0, bit_band(bit_rshift(v, 18), 0x07)), bit_bor(0x80, bit_band(bit_rshift(v, 12), 0x3F)), bit_bor(0x80, bit_band(bit_rshift(v, 6), 0x3F)), bit_bor(0x80, bit_band(v, 0x3F)))
 	end
 end
 
@@ -192,7 +166,6 @@ function Tokenizer:Next()
 	if match then
 		return Token.new(TokenVariant.Whitespace, match)
 	end
-
 	match = self:ConsumePattern("^0x")
 	if match then
 		local nums = self:ConsumePattern("^%x+")
@@ -202,7 +175,6 @@ function Tokenizer:Next()
 				return Token.new(TokenVariant.Hexadecimal, val)
 			end
 		end
-
 		return self:Error("Malformed hexadecimal number")
 	end
 
@@ -225,7 +197,6 @@ function Tokenizer:Next()
 		if val then
 			return Token.new(TokenVariant.Decimal, val)
 		end
-
 		return self:Error("Malformed decimal number")
 	end
 
@@ -235,7 +206,6 @@ function Tokenizer:Next()
 		if self:ConsumePattern("^[a-zA-Z_]") then
 			self:Error("Malformed quaternion literal")
 		end
-
 		return Token.new(TokenVariant.Quat, match)
 	end
 
@@ -255,7 +225,6 @@ function Tokenizer:Next()
 		if val then
 			return Token.new(TokenVariant.Decimal, val)
 		end
-
 		self:Error("Malformed decimal number")
 	end
 
@@ -277,12 +246,10 @@ function Tokenizer:Next()
 	if match then
 		return Token.new(TokenVariant.Ident, match)
 	end
-
 	match = self:ConsumePattern("^_[A-Z0-9_]+")
 	if match then
 		return Token.new(TokenVariant.Constant, match)
 	end
-
 	if self:At() == "_" then
 		-- A discard is used to signal intent that something is intentionally not used.
 		-- This is mainly to avoid warnings for unused variables from events or functions.
@@ -291,37 +258,39 @@ function Tokenizer:Next()
 		return Token.new(TokenVariant.Ident, "_")
 	end
 
-	if self:At() == "\"" then
+	if self:At() == '"' then
 		self:SkipChar()
 		local buffer, nbuffer = {}, 0
 		while true do
-			local m = self:ConsumePatternMulti("^[^\"\\]*[\"\\]")
+			local m = self:ConsumePatternMulti('^[^"\\]*["\\]')
 			local line, col = self.line, self.col
-
 			if m then
 				nbuffer = nbuffer + 1
 				buffer[nbuffer] = string_sub(m, 1, -2)
-
 				-- See if the last char in the match was a quote or an escape char
-				if string_sub(m, -1, -1) == "\"" then
+				if string_sub(m, -1, -1) == '"' then
 					break
 				else -- Escape
 					local char = self:At()
 					local esc, err = ""
-
 					-- Using %g here just to be a bit more informative on warnings
 					if escapes[char] then
 						self:SkipChar() -- its crucial that this is only done without supporting newlines as long as `escapes` doesn't support doing \<newline>
 						esc = escapes[char]
 					elseif char == "u" then
 						self:SkipChar()
-						if self:At() ~= "{" then err = "Unicode escape must begin with {" goto _err end
+						if self:At() ~= "{" then
+							err = "Unicode escape must begin with {"
+							goto _err
+						end
 
 						esc = self:ConsumePatternMulti("^%b{}")
-
-						if not esc then err = "Unicode escape must end with }"
-						elseif #esc == 2 then err = "Unicode escape cannot be empty"
-						elseif #esc > 8 then err = "Unicode escape can only contain up to 6 characters"
+						if not esc then
+							err = "Unicode escape must end with }"
+						elseif #esc == 2 then
+							err = "Unicode escape cannot be empty"
+						elseif #esc > 8 then
+							err = "Unicode escape can only contain up to 6 characters"
 						else
 							esc = string_sub(esc, 2, -2)
 							local illegal = string_find(esc, "%X") -- Scan for bad characters
@@ -330,6 +299,7 @@ function Tokenizer:Next()
 								col = col + illegal + 1
 								goto _err
 							end
+
 							local num = tonumber(esc, 16)
 							if not num then
 								err = "Unicode escape is invalid"
@@ -351,7 +321,12 @@ function Tokenizer:Next()
 						end
 					else
 						esc = "\\"
-						self:Warning("Invalid escape " .. "\\" .. string_gsub(char, "%G", " "), Trace.new(line, col, self.line, self.col), { { at = Trace.new(self.line, self.col - 1, self.line, self.col), replace = "" } })
+						self:Warning("Invalid escape " .. "\\" .. string_gsub(char, "%G", " "), Trace.new(line, col, self.line, self.col), {
+							{
+								at = Trace.new(self.line, self.col - 1, self.line, self.col),
+								replace = "",
+							},
+						})
 					end
 
 					::_err::
@@ -360,15 +335,15 @@ function Tokenizer:Next()
 						self:ConsumePatternMulti("^.*")
 						return self:Error(err, tr)
 					end
+
 					nbuffer = nbuffer + 1
 					buffer[nbuffer] = esc
 				end
 			else
 				self:ConsumePatternMulti("^.*")
-				return self:Error("Missing \" to end string")
+				return self:Error('Missing " to end string')
 			end
 		end
-
 		return Token.new(TokenVariant.String, table.concat(buffer, "", 1, nbuffer))
 	end
 
@@ -380,7 +355,6 @@ function Tokenizer:Next()
 
 	---@type string|Operator|nil
 	local op = E2Lib.optable[self:At()]
-
 	while op do
 		if op[2] and op[2][self:PeekChar()] then
 			op = op[2][self:NextChar()]
@@ -390,7 +364,6 @@ function Tokenizer:Next()
 	end
 
 	self:SkipChar()
-
 	if op then
 		return Token.new(TokenVariant.Operator, E2Lib.OperatorLookup[E2Lib.optable_inv[op[1]]])
 	end
@@ -421,68 +394,58 @@ end
 function Tokenizer:NextChar()
 	self.pos = self.pos + 1
 	self.col = self.col + 1
-
 	return string_sub(self.code, self.pos, self.pos)
 end
 
-function Tokenizer:ConsumePatternMulti(pattern --[[@param pattern string]])
+function Tokenizer:ConsumePatternMulti(pattern) --[[@param pattern string]]
 	local start, ed = string_find(self.code, pattern, self.pos)
-	if not start then return end
-
+	if not start then
+		return
+	end
 	local match = string_sub(self.code, start, ed)
 	local _, newlines = string_gsub(match, "\n", "")
-
 	if newlines ~= 0 then
 		local final_nl, final_char = string_find(match, "\n[^\n]*$")
-
 		self.pos = ed + 1
 		self.col = final_char - final_nl + 1
-
 		self.line = self.line + newlines
-
 		return match
 	end
 
 	-- Assume no newlines were matched past here.
-
 	self.pos = ed + 1
 	self.col = self.col + (ed - start + 1)
-
 	return match
 end
 
-function Tokenizer:ConsumePattern(pattern --[[@param pattern string]])
+function Tokenizer:ConsumePattern(pattern) --[[@param pattern string]]
 	local start, ed = string_find(self.code, pattern, self.pos)
-	if not start then return end
-
+	if not start then
+		return
+	end
 	self.pos = ed + 1
 	self.col = self.col + (ed - start + 1)
-
 	return string_sub(self.code, start, ed)
 end
 
 ---@return Token[]
 function Tokenizer:Process(code)
 	self.pos, self.col, self.line, self.code, self.warnings, self.errors = 1, 1, 1, code, {}, {}
-
 	local length = #code
 	local tokens, ntok, error, nerror = {}, 0, {}, 0
-
 	local line, col, whitespaced = 1, 1, false
-
 	function self:GetTrace()
 		return Trace.new(line, col, self.line, self.col)
 	end
 
 	while self.pos <= length do
 		local tok = self:Next()
-
 		if tok == nil then
 			nerror = nerror + 1
 			error[nerror] = self:Prev()
 		elseif tok ~= false then
 			if nerror ~= 0 then
-				self:Error("Unexpected symbol '" .. table.concat(error, '', 1, nerror) .. "'", Trace.new(line, col, line, col + nerror))
+				self:Error("Unexpected symbol '" .. table.concat(error, "", 1, nerror) .. "'", Trace.new(line, col, line, col + nerror))
 				nerror = 0
 			end
 
@@ -491,20 +454,16 @@ function Tokenizer:Process(code)
 			else
 				tok.trace = Trace.new(line, col, self.line, self.col)
 				tok.whitespaced = whitespaced
-
 				line, col = self.line, self.col
-
 				ntok = ntok + 1
 				tokens[ntok] = tok
-
 				whitespaced = false
 			end
 		end
 	end
 
 	if nerror ~= 0 then
-		self:Error("Unexpected symbol '" .. table.concat(error, '', 1, nerror) .. "'", Trace.new(line, col, line, col + nerror))
+		self:Error("Unexpected symbol '" .. table.concat(error, "", 1, nerror) .. "'", Trace.new(line, col, line, col + nerror))
 	end
-
 	return tokens
 end
