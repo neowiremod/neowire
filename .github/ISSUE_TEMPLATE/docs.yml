@@ -1,0 +1,24 @@
+name: 📚 Documentation Request
+description: Suggest changes to the documentation
+labels: [docs]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, please make sure that there's no issue already open for this suggestion.
+
+        Please note that this is not a guarantee your feature will be accepted.
+        For best results, maybe consult the [Discord](https://discord.gg/xQnwhuktG6) before making an issue.
+  - type: textarea
+    attributes:
+      label: What is the problem this feature would solve?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What are you proposing to solve the problem?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What alternatives have you considered?
