@@ -1,0 +1,41 @@
+name: 🐛 Bug Report
+description: Report an issue that should be fixed
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a bug report.
+
+        Before submitting, please make sure that there's no issue already open for this bug, and that you are on the latest version.
+        If you need help or support and are not reporting a bug, please join the [Discord](https://discord.gg/xQnwhuktG6) server.
+
+        Please try to include as much information as possible.
+
+  - type: input
+    attributes:
+      label: What GMod branch are you on?
+      description: Run `print(BRANCH)` on your server.
+  - type: input
+    attributes:
+      label: What OS are you on?
+      description: |
+        This is the OS of the server if it is a serverside bug, or your computer if clientside.
+  - type: textarea
+    attributes:
+      label: What steps can reproduce the bug?
+      description: Explain the bug, provide a dupe or code snippet to reproduce it.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What is the expected behavior?
+      description: If possible, please provide text instead of a screenshot.
+  - type: textarea
+    attributes:
+      label: What do you see instead?
+      description: If possible, please provide text instead of a screenshot.
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Is there anything else you think we should know?
