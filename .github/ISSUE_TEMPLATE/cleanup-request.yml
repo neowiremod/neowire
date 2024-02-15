@@ -1,0 +1,23 @@
+name: 🧹 Cleanup Request
+description: Suggest a refactoring or non feature enhancement
+labels: [cleanup]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If you are a wiremod user, this is likely not the template you want.
+
+        This is intended for developers to keep track of areas that need work.
+  - type: textarea
+    attributes:
+      label: What is the problem this cleanup would solve?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What is the cleanup you are proposing to solve the problem?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What alternatives have you considered?
