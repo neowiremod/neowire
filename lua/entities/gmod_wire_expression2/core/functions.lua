@@ -15,10 +15,6 @@ registerType("function", "f", nil,
 
 __e2setcost(1)
 
-e2function number operator_is(function f)
-	return f and 1 or 0
-end
-
 local function splitTypeFast(sig)
 	local i, r, count, len = 1, {}, 0, #sig
 	while i <= len do
