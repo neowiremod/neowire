@@ -1976,6 +1976,10 @@ local function DEFAULT_EQUALS(self, lhs, rhs)
 	return lhs == rhs and 1 or 0
 end
 
+local function DEFAULT_IS(self, val)
+	return val and 1 or 0
+end
+
 ---@param variant string
 ---@param types TypeSignature[]
 ---@param trace Trace
@@ -1988,6 +1992,9 @@ function Compiler:GetOperator(variant, types, trace)
 	if fn then
 		self.scope.data.ops = self.scope.data.ops + (fn[4] or 2) + (fn.attributes.legacy and 1 or 0)
 		return fn[3], fn[2], fn.attributes.legacy, false
+	elseif variant == "is" and #types == 1 then
+		self.scope.data.ops = self.scope.data.ops + 1
+		return DEFAULT_IS, "n", false, true
 	elseif variant == "eq" and #types == 2 and types[1] == types[2] then
 		-- If no equals operator present, default to just basic lua equals.
 		self.scope.data.ops = self.scope.data.ops + 1

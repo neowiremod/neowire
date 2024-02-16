@@ -46,10 +46,6 @@ E2Lib.registerConstant("DMG_MISSILEDEFENSE", DMG_MISSILEDEFENSE)
 
 __e2setcost(1)
 
-e2function number operator_is(damage dmg)
-	return dmg and 1 or 0
-end
-
 [nodiscard]
 e2function number damage:isType(number type)
 	return this:IsDamageType(type) and 1 or 0

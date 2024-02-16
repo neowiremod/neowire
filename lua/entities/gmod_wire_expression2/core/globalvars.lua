@@ -30,12 +30,6 @@ registerType( "gtable", "xgt", {},
 	end
 )
 
-__e2setcost(1)
-
-e2function number operator_is(gtable this)
-	return istable(this) and 1 or 0
-end
-
 ------------------------------------------------
 -- gTable
 ------------------------------------------------

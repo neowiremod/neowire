@@ -51,26 +51,6 @@ registerType("egpobject", "xeo", NULL_EGPOBJECT,
 	end
 )
 
-__e2setcost(2)
-
-registerOperator("ass", "xeo", "xeo", function(self, args)
-	local lhs, op2, scope = args[2], args[3], args[4]
-	local rhs = op2[1](self, op2)
-	if rhs == nil then return nil end
-
-	self.Scopes[scope][lhs] = rhs
-	self.Scopes[scope].vclk[lhs] = true
-	return rhs
-end)
-
-e2function number operator_is(egpobject egpo)
-	return (getmetatable(egpo) == M_EGPObject) and 1 or 0
-end
-
-e2function number operator==(egpobject lhs, egpobject rhs)
-	return (lhs == rhs) and 1 or 0
-end
-
 ---- Functions
 
 ----------------------------
