@@ -14,8 +14,8 @@ assert(2 ^ 4 * 3 == 48, "Should parse as (2 ^ 4) * 3")
 
 assert(1 | 1 & 0, "Should parse as 1 | (1 & 0) but parsed as (1 | 1) & 0")
 
-assert(1 || 1 && 0, "Should parse as 1 || (1 && 0) but parsed as (1 || 1) && 0")
-assert(1 ^^ 2 && 0 == ((1 ^^ 2) && 0), "Should parse as (1 ^^ 2) && 0 but parsed as 1 ^^ (2 && 0)")
+assert((1 || 1 && 0), "Should parse as 1 || (1 && 0) but parsed as (1 || 1) && 0")
+assert((1 ^^ 2 && 0) == ((1 ^^ 2) && 0), "Should parse as (1 ^^ 2) && 0 but parsed as 1 ^^ (2 && 0)")
 
 assert(2 >> 3 + 2 == (2 >> (3 + 2)))
 assert(2 << 3 + 2 == (2 << (3 + 2)))

@@ -81,20 +81,18 @@ e2function matrix2 identity2()
 			 0, 1 }
 end
 
-e2function number operator_is(matrix2 this)
+e2function boolean operator_is(matrix2 this)
 	return (this[1] ~= 0
 		or this[2] ~= 0
 		or this[3] ~= 0)
-		and 1 or 0
 end
 
 
-e2function number operator==(matrix2 rv1, matrix2 rv2)
+e2function boolean operator==(matrix2 rv1, matrix2 rv2)
 	return (rv1[1] == rv2[1]
 		and rv1[2] == rv2[2]
 		and rv1[3] == rv2[3]
 		and rv1[4] == rv2[4])
-		and 1 or 0
 end
 
 /******************************************************************************/
@@ -444,15 +442,15 @@ e2function matrix identity()
 			 0, 0, 1 }
 end
 
-e2function number operator_is(matrix this)
+e2function boolean operator_is(matrix this)
 	return (
 		this[1] ~= 0 or this[2] ~= 0 or this[3] ~= 0
 		or this[4] ~= 0 or this[5] ~= 0 or this[6] ~= 0
 		or this[7] ~= 0 or this[8] ~= 0 or this[9] ~= 0
-	) and 1 or 0
+	)
 end
 
-e2function number operator==(matrix rv1, matrix rv2)
+e2function boolean operator==(matrix rv1, matrix rv2)
 	return (rv1[1] == rv2[1]
 		and rv1[2] == rv2[2]
 		and rv1[3] == rv2[3]
@@ -462,7 +460,6 @@ e2function number operator==(matrix rv1, matrix rv2)
 		and rv1[7] == rv2[7]
 		and rv1[8] == rv2[8]
 		and rv1[9] == rv2[9])
-		and 1 or 0
 end
 
 /******************************************************************************/
@@ -940,16 +937,16 @@ e2function matrix4 identity4()
 			 0, 0, 0, 1 }
 end
 
-e2function number operator_is(matrix4 this)
+e2function boolean operator_is(matrix4 this)
 	return (
 		this[1] ~= 0 or this[2] ~= 0 or this[3] ~= 0 or this[4] ~= 0
 		or this[5] ~= 0 or this[6] ~= 0 or this[7] ~= 0 or this[8] ~= 0
 		or this[9] ~= 0 or this[10] ~= 0 or this[11] ~= 0 or this[12] ~= 0
 		or this[13] ~= 0 or this[14] ~= 0 or this[15] ~= 0 or this[16] ~= 0
-	) and 1 or 0
+	)
 end
 
-e2function number operator==(matrix4 rv1, matrix4 rv2)
+e2function boolean operator==(matrix4 rv1, matrix4 rv2)
 	return (rv1[1] == rv2[1]
 		and rv1[2] == rv2[2]
 		and rv1[3] == rv2[3]
@@ -966,7 +963,6 @@ e2function number operator==(matrix4 rv1, matrix4 rv2)
 		and rv1[14] == rv2[14]
 		and rv1[15] == rv2[15]
 		and rv1[16] == rv2[16])
-		and 1 or 0
 end
 
 /******************************************************************************/

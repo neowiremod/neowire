@@ -458,7 +458,9 @@ local Keyword = {
 	-- ``do``
 	Do = 20,
 	-- ``event``
-	Event = 21
+	Event = 21,
+	-- ``as``
+	As = 22
 }
 
 E2Lib.Keyword = Keyword

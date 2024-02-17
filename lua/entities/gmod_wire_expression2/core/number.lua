@@ -51,20 +51,20 @@ __e2setcost(1.5)
 
 --[[************************************************************************]]--
 
-e2function number operator>=(number lhs, number rhs)
-	return lhs >= rhs and 1 or 0
+e2function boolean operator>=(number lhs, number rhs)
+	return lhs >= rhs
 end
 
-e2function number operator<=(number lhs, number rhs)
-	return lhs <= rhs and 1 or 0
+e2function boolean operator<=(number lhs, number rhs)
+	return lhs <= rhs
 end
 
-e2function number operator>(number lhs, number rhs)
-	return lhs > rhs and 1 or 0
+e2function boolean operator>(number lhs, number rhs)
+	return lhs > rhs
 end
 
-e2function number operator<(number lhs, number rhs)
-	return lhs < rhs and 1 or 0
+e2function boolean operator<(number lhs, number rhs)
+	return lhs < rhs
 end
 
 --[[************************************************************************]]--

@@ -20,7 +20,7 @@ _G.wire_expression_types = {
 	NORMAL = {"n"}, ANGLE = {"a"},
 	ARRAY = {"r"}, TABLE = {"t"},
 	ENTITY = {"e"}, WIRELINK = {"xwl"},
-	BONE = {"b"}, QUATERNION = {"q"},
+	BONE = {"xbn"}, QUATERNION = {"q"},
 	COMPLEX = {"c"}, GTABLE = {"xgt"},
 	MATRIX = {"m"}, MATRIX2 = {"xm2"},
 	MATRIX4 = {"xm4"}, RANGER = {"xrd"},

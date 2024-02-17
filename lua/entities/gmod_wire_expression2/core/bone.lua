@@ -74,7 +74,7 @@ E2Lib.isValidBone = isValidBone
 
 --[[************************************************************************]]--
 
-registerType("bone", "b", nil,
+registerType("bone", "xbn", nil,
 	nil,
 	nil,
 	nil,
@@ -88,8 +88,8 @@ registerType("bone", "b", nil,
 __e2setcost(1)
 
 --- if (B)
-e2function number operator_is(bone this)
-	return isValidBone(this) and 1 or 0
+e2function boolean operator_is(bone this)
+	return isValidBone(this)
 end
 
 --[[************************************************************************]]--

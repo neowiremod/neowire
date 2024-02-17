@@ -294,14 +294,13 @@ local CompileVisitors = {
 				if ifeif[1] then -- if or elseif
 					local expr, expr_ty = self:CompileExpr(ifeif[1])
 
-					if expr_ty == "n" then -- Optimization: Don't need to run operator_is on number (since we already check if ~= 0 here.)
+					if expr_ty == "b" then -- Optimization: Don't need to run operator_is on boolean
 						chain[i] = {
 							expr,
 							self:CompileStmt(ifeif[2])
 						}
-					else
+					else -- TODO: Could also eliminate need for DEFAULT_IS by having it use above case.
 						local op = self:GetOperator("is", { expr_ty }, trace)
-
 						chain[i] = {
 							function(state)
 								return op(state, expr(state))
@@ -326,7 +325,7 @@ local CompileVisitors = {
 			for _, data in ipairs(chain) do
 				local cond, block = data[1], data[2]
 				if cond then
-					if cond(state) ~= 0 then
+					if cond(state) then
 						state:PushScope()
 						block(state)
 						state:PopScope()
@@ -345,10 +344,14 @@ local CompileVisitors = {
 
 	---@param data { [1]: Node, [2]: Node, [3]: boolean }
 	[NodeVariant.While] = function(self, trace, data)
-		local expr, block = self:Scope(function(scope)
+		local expr, expr_ty, block
+		self:Scope(function(scope)
 			scope.data.loop = true
-			return self:CompileExpr(data[1]), self:CompileStmt(data[2])
+			expr, expr_ty = self:CompileExpr(data[1])
+			block = self:CompileStmt(data[2])
 		end)
+
+		local op = self:GetOperator("is", { expr_ty }, trace)
 
 		if data[3] then
 			-- do while
@@ -367,13 +370,13 @@ local CompileVisitors = {
 					elseif state.__continue__ then
 						state.__continue__ = false
 					end
-				until expr(state) == 0
+				until not op(state, expr(state))
 				state:PopScope()
 			end
 		else
 			return function(state) ---@param state RuntimeContext
 				state:PushScope()
-				while expr(state) ~= 0 do
+				while op(state, expr(state)) do
 					state.prf = state.prf + 1 / 20
 
 					block(state)
@@ -540,7 +543,7 @@ local CompileVisitors = {
 				return b
 			end)
 
-			local eq =  self:GetOperator("eq", { expr_ty, cond_ty }, case[1].trace)
+			local eq = self:GetOperator("eq", { expr_ty, cond_ty }, case[1].trace)
 			cases[i] = {
 				function(state, expr)
 					return eq(state, cond(state), expr)
@@ -568,7 +571,7 @@ local CompileVisitors = {
 
 			for i = 1, ncases do
 				local case = cases[i]
-				if case[1](state, expr) ~= 0 then
+				if case[1](state, expr) then
 					case[2](state)
 
 					if state.__break__ then
@@ -1177,6 +1180,17 @@ local CompileVisitors = {
 		))
 	end,
 
+	---@param data { [1]: Node, [2]: Token<string> }
+	[NodeVariant.ExprCast] = function(self, trace, data)
+		local e, e_ty = self:CompileExpr(data[1])
+		local ty = self:CheckType(data[2])
+		local op = self:GetOperator("as", { e_ty, "=", ty }, trace)
+
+		return function(state)
+			return op(state, e(state))
+		end, ty
+	end,
+
 	---@param data { [1]: Node, [2]: Node }
 	[NodeVariant.ExprDefault] = function(self, trace, data)
 		local cond, cond_ty = self:CompileExpr(data[1])
@@ -1187,7 +1201,7 @@ local CompileVisitors = {
 		local op = self:GetOperator("is", { cond_ty }, trace)
 		return function(state) ---@param state RuntimeContext
 			local iff = cond(state)
-			return op(state, iff) ~= 0 and iff or expr(state)
+			return op(state, iff) and iff or expr(state)
 		end, cond_ty
 	end,
 
@@ -1197,11 +1211,11 @@ local CompileVisitors = {
 		local iff, iff_ty = self:CompileExpr(data[2])
 		local els, els_ty = self:CompileExpr(data[3])
 
-		self:Assert(iff_ty == els_ty, "Cannot use ternary (A ? B : C) operator with differing types", trace)
+		self:Assert(iff_ty == els_ty, "Cannot use ternary (A ? B : C) operator with differing types (" .. iff_ty .. " and " .. els_ty .. ")", trace)
 
 		local op = self:GetOperator("is", { cond_ty }, trace)
 		return function(state) ---@param state RuntimeContext
-			return op(state, cond(state)) ~= 0 and iff(state) or els(state)
+			return op(state, cond(state)) and iff(state) or els(state)
 		end, iff_ty
 	end,
 
@@ -1468,22 +1482,20 @@ local CompileVisitors = {
 		local lhs, lhs_ty = self:CompileExpr(data[1])
 		local rhs, rhs_ty = self:CompileExpr(data[3])
 
-		-- self:Assert(lhs_ty == rhs_ty, "Cannot perform logical operation on differing types", trace)
-
 		local op_lhs, op_lhs_ret = self:GetOperator("is", { lhs_ty }, trace)
 		local op_rhs, op_rhs_ret = self:GetOperator("is", { rhs_ty }, trace)
 
-		self:Assert(op_lhs_ret == "n", "Cannot perform logical operation on type " .. op_lhs_ret, trace)
-		self:Assert(op_rhs_ret == "n", "Cannot perform logical operation on type " .. op_rhs_ret, trace)
+		self:Assert(op_lhs_ret == "b", "Logical op on non bool", trace)
+		self:Assert(op_rhs_ret == "b", "Logical op on non bool", trace)
 
 		if data[2] == Operator.Or then
 			return function(state)
-				return ((op_lhs(state, lhs(state)) ~= 0) or (op_rhs(state, rhs(state)) ~= 0)) and 1 or 0
-			end, "n"
+				return op_lhs(state, lhs(state)) or op_rhs(state, rhs(state))
+			end, "b"
 		else -- Operator.And
 			return function(state)
-				return (op_lhs(state, lhs(state)) ~= 0 and op_rhs(state, rhs(state)) ~= 0) and 1 or 0
-			end, "n"
+				return op_lhs(state, lhs(state)) and op_rhs(state, rhs(state))
+			end, "b"
 		end
 	end,
 
@@ -1494,33 +1506,16 @@ local CompileVisitors = {
 		local lhs, lhs_ty = self:CompileExpr(data[1])
 		local rhs, rhs_ty = self:CompileExpr(data[3])
 
-		self:Assert(lhs_ty == rhs_ty, "Cannot perform equality operation on differing types", trace)
-
-		local op, op_ret, legacy = self:GetOperator("eq", { lhs_ty, rhs_ty }, trace)
-		self:Assert(op_ret == "n", "Cannot use perform equality operation on type " .. lhs_ty, trace)
+		local op, op_ret = self:GetOperator("eq", { lhs_ty, rhs_ty }, trace)
 
 		if data[2] == Operator.Eq then
-			if legacy then
-				local largs = { [1] = {}, [2] = { lhs }, [3] = { rhs }, [4] = { lhs_ty, rhs_ty } }
-				return function(state)
-					return op(state, largs)
-				end, "n"
-			else
-				return function(state)
-					return op(state, lhs(state), rhs(state))
-				end, "n"
-			end
+			return function(state)
+				return op(state, lhs(state), rhs(state))
+			end, op_ret
 		elseif data[2] == Operator.Neq then
-			if legacy then
-				local largs = { [1] = {}, [2] = { lhs }, [3] = { rhs }, [4] = { lhs_ty, rhs_ty } }
-				return function(state)
-					return op(state, largs) == 0 and 1 or 0
-				end, "n"
-			else
-				return function(state)
-					return op(state, lhs(state), rhs(state)) == 0 and 1 or 0
-				end, "n"
-			end
+			return function(state)
+				return not op(state, lhs(state), rhs(state))
+			end, op_ret
 		end
 	end,
 
@@ -1533,20 +1528,13 @@ local CompileVisitors = {
 		if data[1] == Operator.Not then -- Return opposite of operator_is result
 			local op = self:GetOperator("is", { ty }, trace)
 			return function(state)
-				return op(state, exp(state)) == 0 and 1 or 0
-			end, "n"
+				return not op(state, exp(state))
+			end, "b"
 		elseif data[1] == Operator.Sub then -- Negate
-			local op, op_ret, legacy = self:GetOperator("neg", { ty }, trace)
-			if legacy then
-				local largs = { [1] = {}, [2] = { exp }, [3] = { ty } }
-				return function(state)
-					return op(state, largs)
-				end, op_ret
-			else
-				return function(state)
-					return op(state, exp(state))
-				end, op_ret
-			end
+			local op, op_ret = self:GetOperator("neg", { ty }, trace)
+			return function(state)
+				return op(state, exp(state))
+			end, op_ret
 		end
 	end,
 
@@ -1884,7 +1872,16 @@ local CompileVisitors = {
 				if f.arg_sig ~= sig then
 					state:forceThrow("Incorrect arguments passed to lambda, expected (" .. f.arg_sig .. ") got (" .. sig .. ")")
 				elseif f.ret ~= ret_type then
-					state:forceThrow("Expected type " .. (ret_type or "void") .. " from lambda, got " .. (f.ret or "void"))
+					local op = wire_expression2_funcs["op:as(" .. f.ret .. "=" .. ret_type .. ")"]
+					if op then -- Allow giving type that you can cast to.
+						local rargs = {}
+						for k = 1, nargs do
+							rargs[k] = args[k](state)
+						end
+						return op[3](state, f.fn(rargs))
+					else
+						state:forceThrow("Expected type " .. (ret_type or "void") .. " from lambda, got " .. (f.ret or "void"))
+					end
 				else
 					local rargs = {}
 					for k = 1, nargs do
@@ -1973,11 +1970,11 @@ local CompileVisitors = {
 ---@alias TypeSignature string
 
 local function DEFAULT_EQUALS(self, lhs, rhs)
-	return lhs == rhs and 1 or 0
+	return lhs == rhs
 end
 
 local function DEFAULT_IS(self, val)
-	return val and 1 or 0
+	return val and true or false
 end
 
 ---@param variant string
@@ -1988,17 +1985,20 @@ end
 ---@return boolean legacy
 ---@return boolean default
 function Compiler:GetOperator(variant, types, trace)
+
 	local fn = wire_expression2_funcs["op:" .. variant .. "(" .. table.concat(types) .. ")"]
 	if fn then
 		self.scope.data.ops = self.scope.data.ops + (fn[4] or 2) + (fn.attributes.legacy and 1 or 0)
 		return fn[3], fn[2], fn.attributes.legacy, false
-	elseif variant == "is" and #types == 1 then
+	end
+
+	if variant == "is" then
 		self.scope.data.ops = self.scope.data.ops + 1
-		return DEFAULT_IS, "n", false, true
-	elseif variant == "eq" and #types == 2 and types[1] == types[2] then
+		return DEFAULT_IS, "b", false, true
+	elseif variant == "eq" then
 		-- If no equals operator present, default to just basic lua equals.
 		self.scope.data.ops = self.scope.data.ops + 1
-		return DEFAULT_EQUALS, "n", false, true
+		return DEFAULT_EQUALS, "b", false, true
 	end
 
 	self:Error("No such operator: " .. variant .. " (" .. table.concat(types, ", ") .. ")", trace)
@@ -2049,10 +2049,13 @@ end
 ---@return boolean? variadic
 ---@return boolean? userfunction
 function Compiler:GetFunction(name, types, method)
-	local sig, method_prefix = table.concat(types), method and (method .. ":") or ""
+	local method_prefix = method and (method .. ":") or ""
 
+	local sig = table.concat(types)
 	local fn = wire_expression2_funcs[name .. "(" .. method_prefix .. sig .. ")"]
-	if fn then return { op = fn[3], ret = fn[2], args = types, cost = fn[4], attrs = fn.attributes }, false, false end
+	if fn then
+		return { op = fn[3], ret = fn[2], args = types, cost = fn[4], attrs = fn.attributes }, false, false
+	end
 
 	local fn, variadic = self:GetUserFunction(name, types, method)
 	if fn then return fn, variadic, true end
@@ -2060,6 +2063,40 @@ function Compiler:GetFunction(name, types, method)
 	for i = #sig, 0, -1 do
 		fn = wire_expression2_funcs[name .. "(" .. method_prefix .. sig:sub(1, i) .. "...)"]
 		if fn then return { op = fn[3], ret = fn[2], args = types, cost = fn[4], attrs = fn.attributes }, true, false end
+	end
+
+	-- If absolutely no types found, fallback to trying to find any functions that take parameters that can be casted to.
+	-- ie passing boolean to assert(n) should work since boolean as number is valid.
+	-- Currently hardcoded for only booleans..
+
+	local mutable, indices = table.Copy(types)
+
+	for i, ty in ipairs(types) do
+		if ty == "b" then
+			mutable[i], indices = "n", { [i] = true }
+		end
+
+		for j, ty2 in ipairs(types) do
+			if ty2 == "b" then
+				mutable[j] = "n"
+				indices[j] = true
+			end
+
+			local fn = wire_expression2_funcs[name .. "(" .. method_prefix .. table.concat(mutable) .. ")"]
+			if fn then
+				local old = fn[3]
+
+				local wrapper = function(state, args)
+					for k in pairs(indices) do
+						args[k] = args[k] and 1 or 0
+					end
+
+					return old(state, args)
+				end
+
+				return { op = wrapper, ret = fn[2], args = mutable, cost = fn[4], attrs = fn.attributes }, false, false
+			end
+		end
 	end
 end
 

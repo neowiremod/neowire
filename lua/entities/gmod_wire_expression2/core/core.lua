@@ -4,8 +4,8 @@
 
 __e2setcost(0) -- cascaded
 
-e2function number operator_is(number this)
-	return (this ~= 0) and 1 or 0
+e2function boolean operator_is(number this)
+	return this ~= 0
 end
 
 --------------------------------------------------------------------------------

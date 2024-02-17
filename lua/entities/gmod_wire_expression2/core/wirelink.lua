@@ -136,8 +136,8 @@ __e2setcost(2) -- temporary
 
 /******************************************************************************/
 
-e2function number operator_is(wirelink this)
-	return validWirelink(self, this) and 1 or 0
+e2function boolean operator_is(wirelink this)
+	return validWirelink(self, this)
 end
 
 /******************************************************************************/

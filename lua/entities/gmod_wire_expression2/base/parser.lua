@@ -102,6 +102,7 @@ local NodeVariant = {
 	ExprLiteral = 37, -- `"test"` `5e2` `4.023` `4j`
 	ExprIdent = 38, -- `Variable`
 	ExprConstant = 39, -- `_FOO`
+	ExprCast = 40, -- `<EXPR> as <TYPE>`
 }
 
 Parser.Variant = NodeVariant
@@ -706,6 +707,11 @@ function Parser:Expr(ignore_assign)
 		return Node.new(NodeVariant.ExprDefault, { cond, rhs }, cond.trace:stitch(rhs.trace))
 	end
 
+	if self:ConsumeValue(TokenVariant.Keyword, Keyword.As) then
+		local type = self:Assert(self:Type(), "Expected type after 'as' keyword for cast")
+		return Node.new(NodeVariant.ExprCast, { cond, type }, cond.trace:stitch(type.trace))
+	end
+
 	return cond
 end
 
@@ -936,6 +942,11 @@ function Parser:Expr15()
 	local fn = self:ConsumeValue(TokenVariant.Keyword, Keyword.Function)
 	if fn then
 		return Node.new(NodeVariant.ExprFunction, { self:Parameters(), self:Assert(self:Block(), "Expected block to follow function") }, fn.trace:stitch(self:Prev().trace))
+	end
+
+	local b = self:Consume(TokenVariant.Boolean)
+	if b then
+		return Node.new(NodeVariant.ExprLiteral, { "b", b.value }, b.trace)
 	end
 
 	-- Decimal / Hexadecimal / Binary numbers
