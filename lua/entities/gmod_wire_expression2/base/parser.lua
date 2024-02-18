@@ -264,7 +264,7 @@ function Parser:Stmt()
 			self:Error("Left Parenthesis (() must appear before condition")
 		end
 
-		local var = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected for numeric index" )
+		local var = self:Assert( self:Variable(), "Variable expected for numeric index" )
 		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Assignment operator (=) expected to preceed variable" )
 
 		local start = self:Expr()
@@ -286,7 +286,7 @@ function Parser:Stmt()
 		local trace = self:Prev().trace
 		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen), "Left parenthesis (() missing after foreach statement" )
 
-		local key = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected to hold the key" )
+		local key = self:Assert( self:Variable(), "Variable expected to hold the key" )
 
 		local key_type
 		if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
@@ -295,7 +295,7 @@ function Parser:Stmt()
 
 		self:Assert( self:ConsumeValue(TokenVariant.Grammar, Grammar.Comma), "Comma (,) expected after key variable" )
 
-		local value = self:Assert( self:Consume(TokenVariant.Ident), "Variable expected to hold the value" )
+		local value = self:Assert( self:Variable(), "Variable expected to hold the value" )
 		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Col), "Colon (:) expected to separate type from variable" )
 
 		local value_type = self:Assert(self:Type(), "Type expected after colon")
@@ -328,7 +328,7 @@ function Parser:Stmt()
 		end
 	end
 
-	local var = self:Consume(TokenVariant.Ident)
+	local var = self:Variable()
 	if var then
 		--- Increment / Decrement
 		if self:ConsumeTailing(TokenVariant.Operator, Operator.Inc) then
@@ -361,21 +361,21 @@ function Parser:Stmt()
 	if self:ConsumeValue(TokenVariant.Keyword, Keyword.Const) then
 		local trace = self:Prev().trace
 
-		local name = self:Assert(self:Consume(TokenVariant.Ident), "Expected variable name after const")
+		local name = self:Assert(self:Variable(), "Expected variable name after const")
 		self:Assert( self:ConsumeValue(TokenVariant.Operator, Operator.Ass), "Expected = for constant declaration" )
 		local value = self:Assert(self:Expr(), "Expected expression for constant declaration")
 
 		return Node.new(NodeVariant.Const, { name, value }, trace:stitch(self:Prev().trace))
 	end
 
-	local is_local, var = self:ConsumeValue(TokenVariant.Keyword, Keyword.Local) or self:ConsumeValue(TokenVariant.Keyword, Keyword.Let), self:Consume(TokenVariant.Ident)
+	local is_local, var = self:ConsumeValue(TokenVariant.Keyword, Keyword.Local) or self:ConsumeValue(TokenVariant.Keyword, Keyword.Let), self:Variable()
 	if not var then
 		self:Assert(not is_local, "Invalid operator (local) must be used for variable declaration.")
 	else
 		local revert, prev = self.index, self.index
 		local assignments = { { var, is_local and {} or self:Indices(), (is_local or var).trace:stitch(self:Prev().trace) } }
 		while self:ConsumeValue(TokenVariant.Operator, Operator.Ass) do
-			local ident = self:Consume(TokenVariant.Ident)
+			local ident = self:Variable()
 			if ident then
 				prev = self.index
 				assignments[#assignments + 1] = { ident, self:Indices(), ident.trace:stitch(self:Prev().trace) }
@@ -505,7 +505,7 @@ function Parser:Stmt()
 				self:Error("Left parenthesis (() expected after catch keyword")
 			end
 
-			local err_ident = self:Consume(TokenVariant.Ident)
+			local err_ident = self:Variable()
 			if not err_ident then
 				self:Error("Variable expected after left parenthesis (() in catch statement")
 			end
@@ -537,6 +537,14 @@ function Parser:Stmt()
 		local trace, name = self:Prev().trace, self:Assert( self:Consume(TokenVariant.LowerIdent), "Expected event name after 'event' keyword")
 		return Node.new(NodeVariant.Event, { name, self:Parameters(), self:Block() }, trace:stitch(self:Prev().trace))
 	end
+end
+
+function Parser:Variable()
+	local v = self:Consume(TokenVariant.Ident) or self:Consume(TokenVariant.LowerIdent)
+	if v and v.value == "vclk" then
+		self:Error("Illegal variable name. Sorry!")
+	end
+	return v
 end
 
 ---@return Token<string>?
@@ -631,7 +639,7 @@ function Parser:Parameters()
 		if self:ConsumeValue(TokenVariant.Grammar, Grammar.LSquare) then
 			local temp = {}
 			repeat
-				temp[#temp + 1] = self:Assert(self:Consume(TokenVariant.Ident), "Expected parameter name")
+				temp[#temp + 1] = self:Assert(self:Variable(), "Expected parameter name")
 			until self:ConsumeValue(TokenVariant.Grammar, Grammar.RSquare)
 
 			local typ, len = nil, #params
@@ -647,7 +655,7 @@ function Parser:Parameters()
 		else
 			variadic = self:ConsumeValue(TokenVariant.Operator, Operator.Spread)
 
-			local name, type = self:Assert(self:Consume(TokenVariant.Ident), "Expected parameter name")
+			local name, type = self:Assert(self:Variable(), "Expected parameter name")
 			if self:ConsumeValue(TokenVariant.Operator, Operator.Col) then
 				type = self:Assert(self:Type(), "Expected valid parameter type")
 			end
@@ -669,7 +677,7 @@ end
 
 function Parser:Expr(ignore_assign)
 	-- Error for compound operators in expression
-	if self:Consume(TokenVariant.Ident) then
+	if self:Variable() then
 		if not ignore_assign and self:ConsumeValue(TokenVariant.Operator, Operator.Ass) then
 			self:Error("Assignment operator (=) must not be part of equation ( Did you mean == ? )")
 		end
@@ -798,14 +806,10 @@ function Parser:Expr13()
 	return self:Expr14()
 end
 
----@return Node[]
+---@return Node[]?
 function Parser:Arguments()
-	if not self:ConsumeTailing(TokenVariant.Grammar, Grammar.LParen) then
-		if self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
-			self:Error("Left parenthesis (() must not be preceded by whitespace")
-		else
-			self:Error("Left parenthesis (() must appear to start argument list")
-		end
+	if not self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
+		return
 	end
 
 	local arguments = {}
@@ -883,17 +887,19 @@ function Parser:Expr14()
 				end
 			end
 
-			expr = Node.new(NodeVariant.ExprMethodCall, { expr, fn, self:Arguments() }, expr.trace:stitch(self:Prev().trace))
+			expr = Node.new(NodeVariant.ExprMethodCall, { expr, fn, self:Assert(self:Arguments(), "Expected arguments for method call") }, expr.trace:stitch(self:Prev().trace))
 		else
 			local indices = self:Indices()
 			if #indices > 0 then
 				expr = Node.new(NodeVariant.ExprIndex, { expr, indices }, expr.trace:stitch(self:Prev().trace))
 			elseif self:ConsumeValue(TokenVariant.Grammar, Grammar.LSquare) then
 				self:Error("Indexing operator ([]) must not be preceded by whitespace")
-			elseif self:ConsumeTailing(TokenVariant.Grammar, Grammar.LParen) then
-				self.index = self.index - 1
-
+			else
 				local args, typ = self:Arguments()
+
+				if not args then
+					break
+				end
 
 				if self:ConsumeValue(TokenVariant.Grammar, Grammar.LSquare) then
 					typ = self:Assert(self:Type(), "Return type operator ([]) requires a lower case type [type]")
@@ -904,8 +910,6 @@ function Parser:Expr14()
 				end
 
 				return Node.new(NodeVariant.ExprDynCall, { expr, args, typ }, expr.trace:stitch(self:Prev().trace))
-			else
-				break
 			end
 		end
 	end
@@ -923,14 +927,20 @@ function Parser:Expr15()
 
 	local fn = self:Consume(TokenVariant.LowerIdent)
 	if fn then
-		-- Transform key value
-		if fn.value == "array" then
-			return Node.new(NodeVariant.ExprArray, self:ArgumentsKV(Grammar.LParen, Grammar.RParen) or self:Arguments(), fn.trace:stitch(self:Prev().trace))
-		elseif fn.value == "table" then
-			return Node.new(NodeVariant.ExprTable, self:ArgumentsKV(Grammar.LParen, Grammar.RParen) or self:Arguments(), fn.trace:stitch(self:Prev().trace))
-		end
+		if self:ConsumeValue(TokenVariant.Grammar, Grammar.LParen) then
+			self.index = self.index - 1
 
-		return Node.new(NodeVariant.ExprCall, { fn, self:Arguments() }, fn.trace:stitch(self:Prev().trace))
+			-- Transform key value
+			if fn.value == "array" then
+				return Node.new(NodeVariant.ExprArray, self:ArgumentsKV(Grammar.LParen, Grammar.RParen) or self:Arguments(), fn.trace:stitch(self:Prev().trace))
+			elseif fn.value == "table" then
+				return Node.new(NodeVariant.ExprTable, self:ArgumentsKV(Grammar.LParen, Grammar.RParen) or self:Arguments(), fn.trace:stitch(self:Prev().trace))
+			end
+
+			return Node.new(NodeVariant.ExprCall, { fn, self:Arguments() }, fn.trace:stitch(self:Prev().trace))
+		else
+			self.index = self.index - 1
+		end
 	end
 
 	local fn = self:ConsumeValue(TokenVariant.Keyword, Keyword.Function)
@@ -975,14 +985,7 @@ function Parser:Expr15()
 	for _, v in ipairs { { "~", Operator.Trg }, { "$", Operator.Dlt }, { "->", Operator.Imp } } do
 		local op = self:ConsumeValue(TokenVariant.Operator, v[2])
 		if op then
-			local ident = self:ConsumeTailing(TokenVariant.Ident)
-			if not ident then
-				if self:Consume(TokenVariant.Ident) then
-					self:Error("Operator (" .. v[1] .. ") must not be succeeded by whitespace")
-				else
-					self:Error("Operator (" .. v[1] .. ") must be followed by variable")
-				end
-			end ---@cast ident Token
+			local ident = self:Assert( self:Variable(), "Operator (" .. v[1] .. ") must be followed by variable")
 
 			if v[2] == Operator.Dlt then -- TODO: Delete this and move to analyzer step
 				self.delta_vars[ident.value] = true
@@ -992,8 +995,8 @@ function Parser:Expr15()
 		end
 	end
 
-	-- Increment/Decrement
-	if self:Consume(TokenVariant.Ident) then
+	local ident = self:Variable()
+	if ident then
 		if self:ConsumeTailing(TokenVariant.Operator, Operator.Inc) then
 			self:Error("Increment operator (++) must not be part of equation")
 		elseif self:ConsumeValue(TokenVariant.Operator, Operator.Inc) then
@@ -1006,12 +1009,6 @@ function Parser:Expr15()
 			self:Error("Decrement operator (--) must not be preceded by whitespace")
 		end
 
-		self.index = self.index - 1
-	end
-
-	-- Variables
-	local ident =  self:Consume(TokenVariant.Ident)
-	if ident then
 		return Node.new(NodeVariant.ExprIdent, ident, ident.trace)
 	end
 

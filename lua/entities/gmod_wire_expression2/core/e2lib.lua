@@ -1002,7 +1002,6 @@ end
 
 ---@class RuntimeScope: table<string, any>
 ---@field vclk table<string, boolean>
----@field parent RuntimeScope?
 
 --- Context of an Expression 2 at runtime.
 ---@class RuntimeContext
@@ -1050,7 +1049,7 @@ RuntimeContextBuilder.__index = RuntimeContextBuilder
 
 ---@return RuntimeContextBuilder
 function RuntimeContext.builder()
-	local global = { vclk = {}, lookup = {}, parent = nil }
+	local global = { vclk = {}, lookup = {} }
 	return setmetatable({
 		GlobalScope = global,
 		Scopes = { [0] = global },

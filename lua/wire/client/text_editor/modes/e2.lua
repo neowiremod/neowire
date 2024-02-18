@@ -100,7 +100,7 @@ local function addToken(tokenname, tokendata)
 end
 
 local function acceptIdent(self)
-	return self:NextPattern("^[A-Z][a-zA-Z0-9_]*") or self:NextPattern("^_")
+	return self:NextPattern("^[a-zA-Z0-9_]+") or self:NextPattern("^_")
 end
 
 local function addOptional(self, pattern, tokendata)
@@ -367,8 +367,8 @@ function EDITOR:SyntaxColorLine(row)
 				local dots = self:SkipPattern( "%.%.%." )
 				if dots then addToken( "operator", dots ) end
 
-				local invalidInput = self:SkipPattern( "[^A-Z:%[_]*" )
-				if invalidInput then addToken( "notfound", invalidInput ) end
+				local invalidInput = self:SkipPattern( "[^a-zA-Z:%[_]*" )
+				if invalidInput then addToken( "variable", invalidInput ) end
 
 				if self:NextPattern( "%[" ) then -- Found a [
 					-- Color the bracket
@@ -397,6 +397,9 @@ function EDITOR:SyntaxColorLine(row)
 					addToken( "operator", ":" )
 					self.tokendata = ""
 				end
+
+				local spaces = self:SkipPattern( " *" )
+				if spaces then addToken( "comment", spaces ) end
 
 				-- Find the type
 				if self:NextPattern( "[a-z][a-zA-Z0-9_]*" ) then
@@ -576,7 +579,7 @@ function EDITOR:SyntaxColorLine(row)
 						highlightmode = nil
 					end
 				else
-					tokenname = "notfound"
+					tokenname = "variable"
 				end
 			else
 				-- is this a keyword or a function?
@@ -598,33 +601,34 @@ function EDITOR:SyntaxColorLine(row)
 						self.tokendata = spaces .. "void"
 						spaces = ""
 					end
-				elseif wire_expression2_funclist[sstr] then
-					tokenname = "function"
-
-				elseif self.e2fs_functions[sstr] or self.e2fs_methods[sstr] then
-					tokenname = "userfunction"
-
-				else
-					tokenname = "notfound"
-
-					local correctName = wire_expression2_funclist_lowercase[sstr:lower()]
-					if correctName then
-						self.tokendata = ""
-						for i = 1,#sstr do
-							local c = sstr:sub(i,i)
-							if correctName:sub(i,i) == c then
-								tokenname = "function"
-							else
-								tokenname = "notfound"
-							end
-							if i == #sstr then
-								self.tokendata = c
-							else
-								addToken(tokenname, c)
+				elseif self.character == "(" then
+					if wire_expression2_funclist[sstr] then
+						tokenname = "function"
+					elseif self.e2fs_functions[sstr] or self.e2fs_methods[sstr] then
+						tokenname = "userfunction"
+					else
+						local correctName = wire_expression2_funclist_lowercase[sstr:lower()]
+						if correctName then
+							self.tokendata = ""
+							for i = 1,#sstr do
+								local c = sstr:sub(i,i)
+								if correctName:sub(i,i) == c then
+									tokenname = "function"
+								else
+									tokenname = "notfound"
+								end
+								if i == #sstr then
+									self.tokendata = c
+								else
+									addToken(tokenname, c)
+								end
 							end
 						end
 					end
+				else
+					tokenname = "variable"
 				end
+
 				addToken(tokenname, self.tokendata)
 				tokenname = "operator"
 				self.tokendata = spaces
