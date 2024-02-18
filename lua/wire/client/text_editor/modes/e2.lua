@@ -301,6 +301,7 @@ function EDITOR:SyntaxColorLine(row)
 			else
 				addToken( "notfound", typeindex )
 			end
+
 			addToken( "operator", ":" )
 			addToken( "userfunction", funcname )
 
@@ -333,6 +334,7 @@ function EDITOR:SyntaxColorLine(row)
 			else
 				addToken( "notfound", typeindex )
 			end
+
 			addToken( "operator", ":" )
 			addToken( "userfunction", funcname )
 
@@ -367,8 +369,8 @@ function EDITOR:SyntaxColorLine(row)
 				local dots = self:SkipPattern( "%.%.%." )
 				if dots then addToken( "operator", dots ) end
 
-				local invalidInput = self:SkipPattern( "[^a-zA-Z:%[_]*" )
-				if invalidInput then addToken( "variable", invalidInput ) end
+				local invalidInput = self:SkipPattern( "[^a-z0-9A-Z:%[_]*" )
+				if invalidInput then addToken( "notfound", invalidInput ) end
 
 				if self:NextPattern( "%[" ) then -- Found a [
 					-- Color the bracket
@@ -623,6 +625,8 @@ function EDITOR:SyntaxColorLine(row)
 									addToken(tokenname, c)
 								end
 							end
+						else
+							tokenname = "notfound"
 						end
 					end
 				else
