@@ -1,0 +1,15 @@
+## SHOULD_PASS:EXECUTE
+
+const Hi = 2
+assert(Hi == 2)
+
+const helloFromLowercase = 523
+assert(helloFromLowercase == 523)
+
+giveme4 = "test"
+assert(giveme4 == "test")
+
+Hi5 = 52
+hi5 = 21
+
+assert(Hi5 == 52)
