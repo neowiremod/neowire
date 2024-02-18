@@ -1,0 +1,3 @@
+## SHOULD_FAIL:COMPILE
+
+lookup = "str"

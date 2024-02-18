@@ -539,9 +539,14 @@ function Parser:Stmt()
 	end
 end
 
+-- Fields used on the Scope
+local Illegal = {
+	["vclk"] = true, ["lookup"] = true
+}
+
 function Parser:Variable()
 	local v = self:Consume(TokenVariant.Ident) or self:Consume(TokenVariant.LowerIdent)
-	if v and v.value == "vclk" then
+	if v and Illegal[v.value] then
 		self:Error("Illegal variable name. Sorry!")
 	end
 	return v
