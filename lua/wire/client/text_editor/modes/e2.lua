@@ -34,7 +34,13 @@ local keywords = {
 	["try"]    = { [true] = true },
 	["do"] = { [true] = true },
 	["event"] = { [true] = true },
-	["#include"] = { [true] = true }
+	["#include"] = { [true] = true },
+	["as"] = { [true] = true }
+}
+
+local const_keywords = {
+	["true"] = true,
+	["false"] = true,
 }
 
 EDITOR.Keywords = keywords
@@ -597,7 +603,11 @@ function EDITOR:SyntaxColorLine(row)
 						tokenname = "typename"
 						self.tokendata = spaces .. "void"
 						spaces = ""
+					elseif sstr == "as" then
+						highlightmode = 5
 					end
+				elseif const_keywords[sstr] then
+					tokenname = "constant"
 				elseif wire_expression2_funclist[sstr] then
 					tokenname = "function"
 

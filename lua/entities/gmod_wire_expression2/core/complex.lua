@@ -86,26 +86,23 @@ end
 
 __e2setcost(2)
 
-e2function number operator_is(complex this)
-	return (this[1] ~= 0 or this[2] ~= 0) and 1 or 0
+e2function boolean operator_is(complex this)
+	return (this[1] ~= 0 or this[2] ~= 0)
 end
 
-e2function number operator==(complex lhs, complex rhs)
+e2function boolean operator==(complex lhs, complex rhs)
 	return (lhs[1] == rhs[1]
 		and lhs[2] == rhs[2])
-		and 1 or 0
 end
 
-e2function number operator==(complex lhs, number rhs)
+e2function boolean operator==(complex lhs, number rhs)
 	return (lhs[1] == rhs
 		and lhs[2] == 0)
-		and 1 or 0
 end
 
-e2function number operator==(number lhs, complex rhs)
+e2function boolean operator==(number lhs, complex rhs)
 	return (lhs == rhs[1]
 		and rhs[2] == 0)
-		and 1 or 0
 end
 
 /******************************************************************************/

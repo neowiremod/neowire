@@ -52,14 +52,13 @@ registerFunction("vec2", "xv4", "xv2", function(self, args)
 	return { rv1[1], rv1[2] }
 end)
 
-registerOperator("is", "xv2", "n", function(self, this)
-	return (this[1] ~= 0 and this[2] ~= 0) and 1 or 0
+registerOperator("is", "xv2", "b", function(self, this)
+	return this[1] ~= 0 and this[2] ~= 0
 end, 2, nil, { legacy = false })
 
-registerOperator("eq", "xv2xv2", "n", function(self, lhs, rhs)
+registerOperator("eq", "xv2xv2", "b", function(self, lhs, rhs)
 	return (lhs[1] == rhs[1]
 		and lhs[2] == rhs[2])
-		and 1 or 0
 end, 2, nil, { legacy = false })
 
 /******************************************************************************/
@@ -569,16 +568,15 @@ end)
 
 /******************************************************************************/
 
-registerOperator("is", "xv4", "n", function(self, this)
-	return (this[1] ~= 0 or this[2] ~= 0 or this[3] ~= 0 or this[4] ~= 0) and 1 or 0
+registerOperator("is", "xv4", "b", function(self, this)
+	return (this[1] ~= 0 or this[2] ~= 0 or this[3] ~= 0 or this[4] ~= 0)
 end, 2, nil, { legacy = false })
 
-registerOperator("eq", "xv4xv4", "n", function(self, lhs, rhs)
+registerOperator("eq", "xv4xv4", "b", function(self, lhs, rhs)
 	return (lhs[1] == rhs[1]
 		and lhs[2] == rhs[2]
 		and lhs[3] == rhs[3]
 		and lhs[4] == rhs[4])
-		and 1 or 0
 end, 2, nil, { legacy = false })
 
 /******************************************************************************/

@@ -442,12 +442,11 @@ end)
 
 __e2setcost(6)
 
-e2function number operator==(quaternion lhs, quaternion rhs)
+e2function boolean operator==(quaternion lhs, quaternion rhs)
 	return (lhs[1] == rhs[1]
 		and lhs[2] == rhs[2]
 		and lhs[3] == rhs[3]
 		and lhs[4] == rhs[4])
-		and 1 or 0
 end
 
 /******************************************************************************/

@@ -56,28 +56,28 @@ end)
 
 --[[******************************************************************************]]--
 
-e2function number operator_is(string this)
-	return this ~= "" and 1 or 0
+e2function boolean operator_is(string this)
+	return this ~= ""
 end
 
-e2function number operator>=(string lhs, string rhs)
+e2function boolean operator>=(string lhs, string rhs)
 	self.prf = self.prf + math.min(#lhs, #rhs) / 10
-	return lhs >= rhs and 1 or 0
+	return lhs >= rhs
 end
 
-e2function number operator<=(string lhs, string rhs)
+e2function boolean operator<=(string lhs, string rhs)
 	self.prf = self.prf + math.min(#lhs, #rhs) / 10
-	return lhs <= rhs and 1 or 0
+	return lhs <= rhs
 end
 
-e2function number operator>(string lhs, string rhs)
+e2function boolean operator>(string lhs, string rhs)
 	self.prf = self.prf + math.min(#lhs, #rhs) / 10
-	return lhs > rhs and 1 or 0
+	return lhs > rhs
 end
 
-e2function number operator<(string lhs, string rhs)
+e2function boolean operator<(string lhs, string rhs)
 	self.prf = self.prf + math.min(#lhs, #rhs) / 10
-	return lhs < rhs and 1 or 0
+	return lhs < rhs
 end
 
 --[[******************************************************************************]]--

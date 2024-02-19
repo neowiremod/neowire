@@ -59,8 +59,8 @@ __e2setcost(5) -- temporary
 
 --[[******************************************************************************]]
 
-e2function number operator_is(entity this)
-	return IsValid(this) and 1 or 0
+e2function boolean operator_is(entity this)
+	return IsValid(this)
 end
 
 --[[******************************************************************************]]

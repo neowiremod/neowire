@@ -1,0 +1,7 @@
+## SHOULD_PASS:EXECUTE
+
+assert( (1 as boolean) == true )
+assert( (-1 as boolean) == true )
+assert( (5 as boolean) == true )
+
+assert( (0 as boolean) == false )

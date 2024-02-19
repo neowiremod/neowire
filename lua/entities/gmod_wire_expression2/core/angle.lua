@@ -37,38 +37,34 @@ e2function angle ang(vector rv1)
 	return Angle(rv1[1], rv1[2], rv1[3])
 end
 
-e2function number operator_is(angle this)
-	return this:IsZero() and 0 or 1
+e2function boolean operator_is(angle this)
+	return not this:IsZero()
 end
 
 __e2setcost(1)
 
-e2function number operator>=(angle lhs, angle rhs)
+e2function boolean operator>=(angle lhs, angle rhs)
 	return (lhs[1] >= rhs[1]
 		and lhs[2] >= rhs[2]
 		and lhs[3] >= rhs[3])
-		and 1 or 0
 end
 
-e2function number operator<=(angle lhs, angle rhs)
+e2function boolean operator<=(angle lhs, angle rhs)
 	return (lhs[1] <= rhs[1]
 		and lhs[2] <= rhs[2]
 		and lhs[3] <= rhs[3])
-		and 1 or 0
 end
 
-e2function number operator>(angle lhs, angle rhs)
+e2function boolean operator>(angle lhs, angle rhs)
 	return (lhs[1] > rhs[1]
 		and lhs[2] > rhs[2]
 		and lhs[3] > rhs[3])
-		and 1 or 0
 end
 
-e2function number operator<(angle lhs, angle rhs)
+e2function boolean operator<(angle lhs, angle rhs)
 	return (lhs[1] < rhs[1]
 		and lhs[2] < rhs[2]
 		and lhs[3] < rhs[3])
-		and 1 or 0
 end
 
 __e2setcost(2)

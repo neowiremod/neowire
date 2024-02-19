@@ -253,8 +253,8 @@ end
 
 __e2setcost(1)
 
-e2function number operator_is(table this)
-	return (this.size > 0) and 1 or 0
+e2function boolean operator_is(table this)
+	return (this.size > 0)
 end
 
 --------------------------------------------------------------------------------

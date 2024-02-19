@@ -4,8 +4,8 @@
 
 __e2setcost(0) -- cascaded
 
-e2function number operator_is(number this)
-	return (this ~= 0) and 1 or 0
+e2function boolean operator_is(number this)
+	return this ~= 0
 end
 
 --------------------------------------------------------------------------------
@@ -111,14 +111,14 @@ do
 		self:forceThrow(reason)
 	end
 
-	e2function void assert(condition)
-		if condition == 0 then
+	e2function void assert(boolean condition)
+		if not condition then
 			self:forceThrow("assert failed")
 		end
 	end
 
-	e2function void assert(condition, string reason)
-		if condition == 0 then
+	e2function void assert(boolean condition, string reason)
+		if not condition then
 			self:forceThrow(reason)
 		end
 	end

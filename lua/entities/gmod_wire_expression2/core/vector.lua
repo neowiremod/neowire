@@ -93,8 +93,8 @@ end
 
 --------------------------------------------------------------------------------
 
-e2function number operator_is(vector this)
-	return this:IsZero() and 0 or 1
+e2function boolean operator_is(vector this)
+	return not this:IsZero()
 end
 
 --------------------------------------------------------------------------------
