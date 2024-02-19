@@ -686,7 +686,7 @@ local CompileVisitors = {
 			self:Warning("Functions should be in the top scope, nesting them does nothing", trace)
 		end
 
-		local fn_data, lookup_variadic, userfunction = self:GetFunction(name.value, param_types, meta_type)
+		local fn_data, lookup_variadic, userfunction = self:GetFunction(name.value, param_types, meta_type, trace)
 		if fn_data then
 			if not userfunction then
 				if not lookup_variadic or variadic_ind == 1 then -- Allow overrides like print(nnn) and print(n..r) to override print(...), but not print(...r)
@@ -1615,7 +1615,7 @@ local CompileVisitors = {
 		end
 
 		local arg_sig = table.concat(types)
-		local fn_data = self:Assert(self:GetFunction(data[1].value, types), "No such function: " .. name.value .. "(" .. table.concat(types, ", ") .. ")", name.trace)
+		local fn_data = self:Assert(self:GetFunction(data[1].value, types, nil, trace), "No such function: " .. name.value .. "(" .. table.concat(types, ", ") .. ")", name.trace)
 		self.scope.data.ops = self.scope.data.ops + fn_data.cost
 
 		self:AssertW(not (used_as_stmt and fn_data.attrs.nodiscard), "The return value of this function cannot be discarded", trace)
@@ -1688,7 +1688,7 @@ local CompileVisitors = {
 		local arg_sig = table.concat(types)
 		local meta, meta_type = self:CompileExpr(data[1])
 
-		local fn_data = self:Assert(self:GetFunction(name.value, types, meta_type), "No such method: " .. (meta_type or "void") .. ":" .. name.value .. "(" .. table.concat(types, ", ") .. ")", name.trace)
+		local fn_data = self:Assert(self:GetFunction(name.value, types, meta_type, trace), "No such method: " .. (meta_type or "void") .. ":" .. name.value .. "(" .. table.concat(types, ", ") .. ")", name.trace)
 		self.scope.data.ops = self.scope.data.ops + fn_data.cost
 
 		self:AssertW(not (used_as_stmt and fn_data.attrs.nodiscard), "The return value of this function cannot be discarded", trace)
@@ -2045,10 +2045,11 @@ end
 ---@param name string
 ---@param types TypeSignature[]
 ---@param method? string
+---@param trace Trace
 ---@return EnvFunction?
 ---@return boolean? variadic
 ---@return boolean? userfunction
-function Compiler:GetFunction(name, types, method)
+function Compiler:GetFunction(name, types, method, trace)
 	local method_prefix = method and (method .. ":") or ""
 
 	local sig = table.concat(types)
@@ -2071,6 +2072,7 @@ function Compiler:GetFunction(name, types, method)
 
 	local mutable, indices = table.Copy(types)
 
+	-- Try casting bools to numbers.
 	for i, ty in ipairs(types) do
 		if ty == "b" then
 			mutable[i], indices = "n", { [i] = true }
@@ -2093,6 +2095,42 @@ function Compiler:GetFunction(name, types, method)
 
 					return old(state, args)
 				end
+
+				-- The reason why we don't give a warning here is because operators return booleans, so it'd be largely unavoidable.
+				-- Maybe could be done with @strict on.
+
+				return { op = wrapper, ret = fn[2], args = mutable, cost = fn[4], attrs = fn.attributes }, false, false
+			end
+		end
+	end
+
+	local mutable, indices = table.Copy(types)
+
+	-- Now try casting numbers to bools.
+	for i, ty in ipairs(types) do
+		if ty == "n" then
+			mutable[i], indices = "b", { [i] = true }
+		end
+
+		for j, ty2 in ipairs(types) do
+			if ty2 == "n" then
+				mutable[j] = "b"
+				indices[j] = true
+			end
+
+			local fn = wire_expression2_funcs[name .. "(" .. method_prefix .. table.concat(mutable) .. ")"]
+			if fn then
+				local old = fn[3]
+
+				local wrapper = function(state, args)
+					for k in pairs(indices) do
+						args[k] = args[k] ~= 0
+					end
+
+					return old(state, args)
+				end
+
+				self:Warning("Passing number to function that takes a boolean.", trace)
 
 				return { op = wrapper, ret = fn[2], args = mutable, cost = fn[4], attrs = fn.attributes }, false, false
 			end

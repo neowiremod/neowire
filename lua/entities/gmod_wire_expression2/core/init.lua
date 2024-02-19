@@ -152,7 +152,7 @@ function registerOperator(name, pars, rets, func, cost, argnames, attributes)
 
 	local enforced = EnforcedTypings[name]
 	if enforced and rets ~= enforced then
-		WireLib.NotifyAll("Registering invalid operator '" .. name .. "' (must return type " .. enforced .. "). Type equality will be treated as lua equals.", 2)
+		WireLib.NotifyAll("Registering invalid operator '" .. name .. "' (must return type " .. enforced .. "). Type equality will be treated as lua equals.\n", 2)
 	end
 
 	local signature = "op:" .. name .. "(" .. pars .. ")"
