@@ -497,14 +497,9 @@ end, function(self)
 end)
 
 
--- isTyping
-local plys = {}
-concommand.Add("E2_StartChat",function(ply,cmd,args) plys[ply] = true end)
-concommand.Add("E2_FinishChat",function(ply,cmd,args) plys[ply] = nil end)
-hook.Add("PlayerDisconnected","E2_istyping",function(ply) plys[ply] = nil end)
-
 e2function number entity:isTyping()
-	return plys[this] and 1 or 0
+	if not IsValid(this) then return self:throw("Invalid player!", -1) end
+	return this:IsTyping() and 1 or 0
 end
 
 --------------------------------------------------------------------------------
